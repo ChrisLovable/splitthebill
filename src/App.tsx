@@ -1,15 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import Tesseract from 'tesseract.js'
 import CameraCapture from './components/CameraCapture'
 import ItemsTable from './components/ItemsTable'
-import TipAllocation from './components/TipAllocation'
 import PhoneFrame from './components/PhoneFrame'
 import ColorPalette from './components/ColorPalette'
 import ReceiptPreview from './components/ReceiptPreview'
-import BottomSummary from './components/BottomSummary'
 import GalleryPicker from './components/GalleryPicker'
 import ChargesTable from './components/ChargesTable'
-import RemainingBar from './components/RemainingBar'
 import TipTable from './components/TipTable'
 import CustomerSplitControls from './components/CustomerSplitControls'
 import AmountRemaining from './components/AmountRemaining'
@@ -28,7 +23,7 @@ function App() {
       <div className="px-4 pt-2 space-y-2">
         <CameraCapture
           isCapturing={state.isCapturing}
-          videoRef={state.videoRef}
+          videoRef={state.videoRef as React.RefObject<HTMLVideoElement>}
           onOpen={state.startCamera}
           onCapture={state.capturePhoto}
           onCancel={state.cancelCamera}
@@ -53,7 +48,6 @@ function App() {
         setTipAmount={state.setTipInput}
         splitTipEvenly={state.splitTipEvenly}
         setSplitTipEvenly={state.setSplitTipEvenly}
-        colors={visibleColors}
         selectedTipColor={state.selectedTipColor}
         setSelectedTipColor={state.setSelectedTipColor}
         activeColor={state.activeColor}

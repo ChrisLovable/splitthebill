@@ -11,15 +11,7 @@ type Props = {
 }
 
 export default function ChargesTable({ charges, splitChargesEvenly, setSplitChargesEvenly, colors, selectedChargeColor, setSelectedChargeColor, activeColor }: Props) {
-  const th: React.CSSProperties = { 
-    padding: 8, 
-    border: '1px solid #000', 
-    background: '#ADD8E6', 
-    color: '#000', 
-    textAlign: 'left', 
-    fontSize: 16,
-    fontWeight: 'bold'
-  }
+
   const td: React.CSSProperties = { 
     padding: 8, 
     border: '1px solid #000', 

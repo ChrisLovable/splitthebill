@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Tesseract from 'tesseract.js'
 import type { BillItem, TipAllocation, BillCharge } from '../types'
 import { DEFAULT_COLORS } from '../types'
-import { parseItemsFromText, parseItemsAndCharges } from '../utils/parse'
+import { parseItemsAndCharges } from '../utils/parse'
 
 export function useBillState() {
   const videoRef = useRef<HTMLVideoElement | null>(null)

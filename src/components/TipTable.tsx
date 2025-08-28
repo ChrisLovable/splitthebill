@@ -6,23 +6,13 @@ type Props = {
   setTipAmount: (n: number) => void
   splitTipEvenly: boolean
   setSplitTipEvenly: (v: boolean) => void
-  colors: string[]
   selectedTipColor: string | null
   setSelectedTipColor: (c: string | null) => void
   activeColor: string | null
 }
 
-export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setSplitTipEvenly, colors, selectedTipColor, setSelectedTipColor, activeColor }: Props) {
+export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setSplitTipEvenly, selectedTipColor, setSelectedTipColor, activeColor }: Props) {
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false)
-  const th: React.CSSProperties = { 
-    padding: 8, 
-    border: '1px solid #000', 
-    background: '#ADD8E6', 
-    color: '#000', 
-    textAlign: 'left', 
-    fontSize: 16,
-    fontWeight: 'bold'
-  }
   const td: React.CSSProperties = { 
     padding: 8, 
     border: '1px solid #000', 
@@ -30,7 +20,6 @@ export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setS
     fontSize: 16,
     fontWeight: 'bold'
   }
-  const labelColor = '#111'
 
   const handleAllocate = () => {
     if (splitTipEvenly) return

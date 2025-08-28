@@ -10,15 +10,7 @@ type Props = {
 export default function ItemsTable({ items, onAllocate, disabled = false }: Props) {
   if (items.length === 0) return null
 
-  const thBase: React.CSSProperties = {
-    padding: '8px',
-    border: '1px solid #000',
-    background: '#ADD8E6',
-    color: '#000000',
-    textAlign: 'left',
-    fontSize: 12,
-    whiteSpace: 'nowrap'
-  }
+
 
   const tdBase: React.CSSProperties = {
     padding: '8px',
