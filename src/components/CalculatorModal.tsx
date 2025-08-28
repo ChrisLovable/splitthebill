@@ -57,16 +57,7 @@ export default function CalculatorModal({ isOpen, currentValue, onClose, onConfi
     setWaitingForValue(false)
   }
 
-  const handleBackspace = () => {
-    if (display.length > 1) {
-      const newDisplay = display.slice(0, -1)
-      setDisplay(newDisplay)
-      setHasDecimal(newDisplay.includes('.'))
-    } else {
-      setDisplay('0')
-      setHasDecimal(false)
-    }
-  }
+
 
   const calculate = (prev: number, current: number, op: string): number => {
     switch (op) {
