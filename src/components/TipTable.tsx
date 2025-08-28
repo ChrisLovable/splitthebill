@@ -13,6 +13,8 @@ type Props = {
 
 export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setSplitTipEvenly, selectedTipColor, setSelectedTipColor, activeColor }: Props) {
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false)
+  
+  console.log('TipTable rendered with tipAmount:', tipAmount)
   const td: React.CSSProperties = { 
     padding: 8, 
     border: '1px solid #000', 

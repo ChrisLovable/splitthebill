@@ -107,6 +107,7 @@ export default function CalculatorModal({ isOpen, currentValue, onClose, onConfi
 
   const handleConfirm = () => {
     const value = parseFloat(display) || 0
+    console.log('Calculator confirming tip amount:', value)
     onConfirm(value)
     onClose()
   }
