@@ -6,3 +6,4 @@ Changes made:
 - Image should load from /atoffice.jpg
 
 Timestamp: 2025-01-13
+

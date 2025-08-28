@@ -16,8 +16,8 @@ export default function AmountRemaining({ items, charges, tipInput, tipAllocatio
   console.log('AmountRemaining component rendered with tipInput:', tipInput)
   
   // Alert on first render to test if debugging is working
-  if (typeof window !== 'undefined' && !window.debugAlertShown) {
-    window.debugAlertShown = true
+  if (typeof window !== 'undefined' && !(window as any).debugAlertShown) {
+    (window as any).debugAlertShown = true
     alert('Debug: AmountRemaining component loaded!')
   }
   

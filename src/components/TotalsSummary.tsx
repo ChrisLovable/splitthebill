@@ -21,3 +21,4 @@ export default function TotalsSummary({ totalsByColor }: Props) {
     </section>
   )
 }
+

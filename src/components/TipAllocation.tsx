@@ -25,3 +25,4 @@ export default function TipAllocation({ incrementTip, tipAllocations }: Props) {
     </section>
   )
 }
+

@@ -15,3 +15,4 @@ export default function ColorSelector({ colors, activeColor, onSelect, onAdd }: 
     </div>
   )
 }
+
