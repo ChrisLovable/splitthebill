@@ -13,7 +13,12 @@ export default function CameraCapture({ isCapturing, videoRef, onOpen, onCapture
     <section className="space-y-2">
       {!isCapturing && (
         <div className="flex items-center justify-center">
-          <button onClick={onOpen} className="btn-3d relative text-[12px] font-extrabold uppercase" style={{ width: 100, height: 50 }}>
+          <button 
+            onClick={onOpen} 
+            onTouchStart={() => {}} 
+            className="btn-3d relative text-[12px] font-extrabold uppercase touch-manipulation" 
+            style={{ width: 100, height: 50, cursor: 'pointer' }}
+          >
             <span className="shine" aria-hidden />
             OPEN CAMERA
           </button>

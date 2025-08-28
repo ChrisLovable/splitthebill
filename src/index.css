@@ -17,6 +17,17 @@ body {
   background: #000000;
   color: #111111;
   font-family: Arial, Helvetica, sans-serif;
+  /* Mobile scrolling improvements */
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+}
+
+/* Mobile viewport fix */
+@media screen and (max-width: 768px) {
+  html, body {
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+  }
 }
 
 /* 3D glassy card */
@@ -55,4 +66,15 @@ body {
 }
 .hide-scrollbar::-webkit-scrollbar { /* Chrome, Safari */
   display: none;
+}
+
+/* Mobile touch improvements */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* Better mobile button interaction */
+button {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }

@@ -52,11 +52,34 @@ export function useBillState() {
   }, [])
 
   const startCamera = async () => {
-    setIsCapturing(true)
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream
-      await videoRef.current.play()
+    try {
+      setIsCapturing(true)
+      
+      // Enhanced camera constraints for mobile
+      const constraints = {
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1280, max: 1920 },
+          height: { ideal: 720, max: 1080 }
+        }
+      }
+      
+      // Check if camera is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Camera not available on this device')
+        setIsCapturing(false)
+        return
+      }
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+      }
+    } catch (error) {
+      console.error('Camera error:', error)
+      alert('Unable to access camera. Please allow camera permissions.')
+      setIsCapturing(false)
     }
   }
 
