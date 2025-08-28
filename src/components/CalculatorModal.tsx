@@ -1,0 +1,243 @@
+import { useState, useEffect } from 'react'
+
+type Props = {
+  isOpen: boolean
+  currentValue: number
+  onClose: () => void
+  onConfirm: (value: number) => void
+}
+
+export default function CalculatorModal({ isOpen, currentValue, onClose, onConfirm }: Props) {
+  const [display, setDisplay] = useState(currentValue > 0 ? currentValue.toFixed(2) : '0')
+  const [hasDecimal, setHasDecimal] = useState(currentValue > 0 ? true : false)
+  const [previousValue, setPreviousValue] = useState<number | null>(null)
+  const [operation, setOperation] = useState<string | null>(null)
+  const [waitingForValue, setWaitingForValue] = useState(false)
+
+  // Reset display when modal opens with new value
+  useEffect(() => {
+    if (isOpen) {
+      const initialValue = currentValue > 0 ? currentValue.toFixed(2) : '0'
+      setDisplay(initialValue)
+      setHasDecimal(initialValue.includes('.'))
+      setPreviousValue(null)
+      setOperation(null)
+      setWaitingForValue(false)
+    }
+  }, [isOpen, currentValue])
+
+  if (!isOpen) return null
+
+  const handleNumber = (num: string) => {
+    if (waitingForValue || display === '0') {
+      setDisplay(num)
+      setWaitingForValue(false)
+    } else {
+      setDisplay(prev => prev + num)
+    }
+  }
+
+  const handleDecimal = () => {
+    if (waitingForValue) {
+      setDisplay('0.')
+      setHasDecimal(true)
+      setWaitingForValue(false)
+    } else if (!hasDecimal && !display.includes('.')) {
+      setDisplay(prev => prev + '.')
+      setHasDecimal(true)
+    }
+  }
+
+  const handleClear = () => {
+    setDisplay('0')
+    setHasDecimal(false)
+    setPreviousValue(null)
+    setOperation(null)
+    setWaitingForValue(false)
+  }
+
+  const handleBackspace = () => {
+    if (display.length > 1) {
+      const newDisplay = display.slice(0, -1)
+      setDisplay(newDisplay)
+      setHasDecimal(newDisplay.includes('.'))
+    } else {
+      setDisplay('0')
+      setHasDecimal(false)
+    }
+  }
+
+  const calculate = (prev: number, current: number, op: string): number => {
+    switch (op) {
+      case '+': return prev + current
+      case '-': return prev - current
+      case '×': return prev * current
+      case '÷': return current !== 0 ? prev / current : prev
+      default: return current
+    }
+  }
+
+  const handleOperation = (op: string) => {
+    const current = parseFloat(display) || 0
+    
+    if (previousValue !== null && operation && !waitingForValue) {
+      const result = calculate(previousValue, current, operation)
+      setDisplay(result.toString())
+      setPreviousValue(result)
+    } else {
+      setPreviousValue(current)
+    }
+    
+    setOperation(op)
+    setWaitingForValue(true)
+    setHasDecimal(false)
+  }
+
+  const handleEquals = () => {
+    if (previousValue !== null && operation) {
+      const current = parseFloat(display) || 0
+      const result = calculate(previousValue, current, operation)
+      setDisplay(result.toString())
+      setPreviousValue(null)
+      setOperation(null)
+      setWaitingForValue(false)
+      setHasDecimal(result.toString().includes('.'))
+    }
+  }
+
+  const handleConfirm = () => {
+    const value = parseFloat(display) || 0
+    onConfirm(value)
+    onClose()
+  }
+
+  const buttonStyle: React.CSSProperties = {
+    width: '60px',
+    height: '60px',
+    border: '3px solid #000',
+    borderStyle: 'outset',
+    background: 'linear-gradient(145deg, #B8E0F0, #8FC8E8)',
+    color: '#000',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    borderRadius: '12px',
+    cursor: 'pointer',
+    boxShadow: '0 6px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.2)',
+    textShadow: '0 1px 2px rgba(255,255,255,0.8)',
+    transition: 'all 0.1s ease'
+  }
+
+  const actionButtonStyle: React.CSSProperties = {
+    ...buttonStyle,
+    background: 'linear-gradient(145deg, #0080FF, #0066DD)',
+    color: '#fff',
+    textShadow: '0 1px 2px rgba(0,0,0,0.5)'
+  }
+
+  const cancelButtonStyle: React.CSSProperties = {
+    ...buttonStyle,
+    background: 'linear-gradient(145deg, #0080FF, #0066DD)',
+    color: '#fff',
+    fontSize: '16px', // Reduced font size for Cancel
+    textShadow: '0 1px 2px rgba(0,0,0,0.5)'
+  }
+
+  const operationButtonStyle: React.CSSProperties = {
+    ...buttonStyle,
+    background: 'linear-gradient(145deg, #FF8800, #E67300)',
+    color: '#fff',
+    textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+    fontSize: '20px'
+  }
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      backdropFilter: 'blur(4px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }}>
+      <div style={{
+        background: 'linear-gradient(145deg, #ffffff, #f0f0f0)',
+        borderRadius: '20px',
+        padding: '24px',
+        border: '4px solid #000',
+        borderStyle: 'outset',
+        boxShadow: '0 12px 24px rgba(0,0,0,0.5), inset 0 2px 6px rgba(255,255,255,0.8), inset 0 -4px 8px rgba(0,0,0,0.1)',
+        minWidth: '300px'
+      }}>
+        {/* Display */}
+        <div style={{
+          background: 'linear-gradient(145deg, #000000, #1a1a1a)',
+          color: '#00FF00',
+          padding: '16px',
+          fontSize: '32px',
+          fontWeight: 'bold',
+          textAlign: 'right',
+          borderRadius: '12px',
+          marginBottom: '20px',
+          border: '3px solid #333',
+          borderStyle: 'inset',
+          boxShadow: 'inset 0 4px 8px rgba(0,0,0,0.8), inset 0 -2px 4px rgba(255,255,255,0.1)',
+          textShadow: '0 0 8px #00FF00, 0 0 12px #00FF00'
+        }}>
+          R{display}
+        </div>
+
+        {/* Row 1: Operations */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '12px' }}>
+          <button style={operationButtonStyle} onClick={() => handleOperation('+')}>+</button>
+          <button style={operationButtonStyle} onClick={() => handleOperation('-')}>-</button>
+          <button style={operationButtonStyle} onClick={() => handleOperation('×')}>×</button>
+          <button style={operationButtonStyle} onClick={() => handleOperation('÷')}>÷</button>
+        </div>
+
+        {/* Row 2: 7-9 and clear */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '8px' }}>
+          <button style={buttonStyle} onClick={() => handleNumber('7')}>7</button>
+          <button style={buttonStyle} onClick={() => handleNumber('8')}>8</button>
+          <button style={buttonStyle} onClick={() => handleNumber('9')}>9</button>
+          <button style={buttonStyle} onClick={handleClear}>C</button>
+        </div>
+
+        {/* Row 3: 4-6 and backspace */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '8px' }}>
+          <button style={buttonStyle} onClick={() => handleNumber('4')}>4</button>
+          <button style={buttonStyle} onClick={() => handleNumber('5')}>5</button>
+          <button style={buttonStyle} onClick={() => handleNumber('6')}>6</button>
+          <button style={buttonStyle} onClick={handleBackspace}>⌫</button>
+        </div>
+
+        {/* Row 4: 1-3 and equals */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '8px' }}>
+          <button style={buttonStyle} onClick={() => handleNumber('1')}>1</button>
+          <button style={buttonStyle} onClick={() => handleNumber('2')}>2</button>
+          <button style={buttonStyle} onClick={() => handleNumber('3')}>3</button>
+          <button style={actionButtonStyle} onClick={handleEquals}>=</button>
+        </div>
+
+        {/* Row 5: 0 and decimal */}
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+          <button style={buttonStyle} onClick={() => handleNumber('0')}>0</button>
+          <button style={buttonStyle} onClick={handleDecimal}>.</button>
+          <div></div>
+        </div>
+
+
+
+        {/* Action Buttons */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <button style={cancelButtonStyle} onClick={onClose}>Cancel</button>
+          <button style={actionButtonStyle} onClick={handleConfirm}>OK</button>
+        </div>
+      </div>
+    </div>
+  )
+}
