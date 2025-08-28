@@ -3,7 +3,7 @@ import ItemsTable from './components/ItemsTable'
 import PhoneFrame from './components/PhoneFrame'
 import ColorPalette from './components/ColorPalette'
 import ReceiptPreview from './components/ReceiptPreview'
-import GalleryPicker from './components/GalleryPicker'
+
 import ChargesTable from './components/ChargesTable'
 import TipTable from './components/TipTable'
 import CustomerSplitControls from './components/CustomerSplitControls'
@@ -28,7 +28,7 @@ function App() {
           onCapture={state.capturePhoto}
           onCancel={state.cancelCamera}
         />
-        <GalleryPicker onPick={(file) => state.loadImageFromFile(file)} />
+
       </div>
 
       <ReceiptPreview image={state.billImage} onRunOCR={state.runOCR} ocrProgress={state.ocrProgress} />

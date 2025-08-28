@@ -136,17 +136,7 @@ export function useBillState() {
     }
   }
 
-  const loadImageFromFile = async (file: File) => {
-    return new Promise<void>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => {
-        setBillImage(reader.result as string)
-        resolve()
-      }
-      reader.onerror = reject
-      reader.readAsDataURL(file)
-    })
-  }
+
 
   const runOCR = async () => {
     if (!billImage) return
@@ -339,7 +329,6 @@ export function useBillState() {
     startCamera,
     cancelCamera,
     capturePhoto,
-    loadImageFromFile,
     runOCR,
     addColor,
     allocateOne,
