@@ -27,36 +27,36 @@ export default function CameraCapture({ isCapturing, videoRef, onOpen, onCapture
       {isCapturing && (
         <div className="space-y-2">
           <video ref={videoRef} className="w-full rounded" playsInline muted autoPlay></video>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button 
               className="flex-1 font-bold touch-manipulation" 
               onClick={onCapture}
               style={{
-                minHeight: '50px',
-                padding: '12px 16px',
-                borderRadius: '12px',
-                border: '3px solid #059669',
+                minHeight: '35px',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '2px solid #059669',
                 borderStyle: 'outset',
                 background: 'linear-gradient(145deg, #10b981, #059669)',
                 color: '#ffffff',
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 'bold',
-                boxShadow: '0 6px 12px rgba(16, 185, 129, 0.4), inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.3)',
+                boxShadow: '0 4px 8px rgba(16, 185, 129, 0.4), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
                 textShadow: '0 1px 2px rgba(0,0,0,0.3)'
               }}
               onMouseDown={(e) => {
-                e.currentTarget.style.transform = 'translateY(2px)'
-                e.currentTarget.style.boxShadow = '0 2px 6px rgba(16, 185, 129, 0.4), inset 0 2px 4px rgba(0,0,0,0.2)'
+                e.currentTarget.style.transform = 'translateY(1px)'
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(16, 185, 129, 0.4), inset 0 1px 2px rgba(0,0,0,0.2)'
               }}
               onMouseUp={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4), inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(16, 185, 129, 0.4), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)'
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4), inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(16, 185, 129, 0.4), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)'
               }}
             >
               📸 Capture
@@ -65,31 +65,31 @@ export default function CameraCapture({ isCapturing, videoRef, onOpen, onCapture
               className="flex-1 font-bold touch-manipulation" 
               onClick={onCancel}
               style={{
-                minHeight: '50px',
-                padding: '12px 16px',
-                borderRadius: '12px',
-                border: '3px solid #6b7280',
+                minHeight: '35px',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '2px solid #6b7280',
                 borderStyle: 'outset',
                 background: 'linear-gradient(145deg, #9ca3af, #6b7280)',
                 color: '#ffffff',
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 'bold',
-                boxShadow: '0 6px 12px rgba(107, 114, 128, 0.4), inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.3)',
+                boxShadow: '0 4px 8px rgba(107, 114, 128, 0.4), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
                 textShadow: '0 1px 2px rgba(0,0,0,0.3)'
               }}
               onMouseDown={(e) => {
-                e.currentTarget.style.transform = 'translateY(2px)'
-                e.currentTarget.style.boxShadow = '0 2px 6px rgba(107, 114, 128, 0.4), inset 0 2px 4px rgba(0,0,0,0.2)'
+                e.currentTarget.style.transform = 'translateY(1px)'
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(107, 114, 128, 0.4), inset 0 1px 2px rgba(0,0,0,0.2)'
               }}
               onMouseUp={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 6px 12px rgba(107, 114, 128, 0.4), inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(107, 114, 128, 0.4), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)'
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 6px 12px rgba(107, 114, 128, 0.4), inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(107, 114, 128, 0.4), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)'
               }}
             >
               Cancel

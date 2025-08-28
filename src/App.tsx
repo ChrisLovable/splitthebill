@@ -11,6 +11,9 @@ import AmountRemaining from './components/AmountRemaining'
 
 import { useBillState } from './hooks/useBillState'
 
+// Try the path you suggested
+const atOfficeImage = "/imageatoffice.jpg"
+
 function App() {
   const state = useBillState()
 
@@ -18,39 +21,58 @@ function App() {
 
   return (
     <PhoneFrame>
-      {/* Header Image - Small Round Button */}
-      <div className="w-full" style={{ textAlign: 'center', padding: '8px 0' }}>
-        <button style={{
-          width: '60px',
-          height: '60px',
-          borderRadius: '50%',
-          border: '2px solid rgba(255,255,255,0.8)',
-          overflow: 'hidden',
-          background: 'transparent',
-          padding: 0,
-          cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2)',
-          transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-        }}
-        onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
-        onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      {/* Header Image - Round Button */}
+      <div style={{ width: '100%', padding: '8px 16px 4px 16px', textAlign: 'center' }}>
+        <button 
+          style={{ 
+            width: '120px', 
+            height: '120px', 
+            borderRadius: '50%', 
+            overflow: 'hidden', 
+            backgroundColor: '#111827',
+            margin: '0 auto',
+            border: '3px solid #22d3ee',
+            cursor: 'pointer',
+            padding: 0,
+            boxShadow: '0 4px 12px rgba(34, 211, 238, 0.3)',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+          }}
+          onMouseDown={(e) => {
+            e.currentTarget.style.transform = 'scale(0.95)'
+            e.currentTarget.style.boxShadow = '0 2px 6px rgba(34, 211, 238, 0.5)'
+          }}
+          onMouseUp={(e) => {
+            e.currentTarget.style.transform = 'scale(1)'
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(34, 211, 238, 0.3)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)'
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(34, 211, 238, 0.3)'
+          }}
+          onClick={() => {
+            console.log('Header image button clicked!')
+            // Add any click functionality here
+          }}
         >
           <img 
-            src="/atoffice.jpg" 
-            alt="At Office" 
+            src={atOfficeImage} 
+            alt="At Office Header" 
             style={{ 
+              display: 'block',
               width: '100%',
               height: '100%',
               objectFit: 'cover',
+              filter: 'brightness(1.1) contrast(1.1) saturate(1.1)',
               borderRadius: '50%'
             }}
-            onError={(e) => {
-              console.error('Image failed to load from /atoffice.jpg:', e)
-              console.log('Trying alternative path...')
-              e.currentTarget.src = './atoffice.jpg'
+            onLoad={(e) => {
+              console.log('Image loaded successfully!')
+              console.log('Src:', e.currentTarget.src)
             }}
-            onLoad={() => console.log('Small round image loaded successfully from:', '/atoffice.jpg')}
+            onError={(e) => {
+              console.log('Image failed to load!')
+              console.log('Failed src:', e.currentTarget.src)
+            }}
           />
         </button>
       </div>
