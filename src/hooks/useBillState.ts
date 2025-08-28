@@ -93,16 +93,47 @@ export function useBillState() {
   }
 
   const capturePhoto = () => {
-    if (!videoRef.current || !canvasRef.current) return
+    if (!videoRef.current) {
+      console.error('Video not available')
+      return
+    }
+    
     const video = videoRef.current
+    
+    // Create canvas if it doesn't exist
+    if (!canvasRef.current) {
+      canvasRef.current = document.createElement('canvas')
+    }
+    
     const canvas = canvasRef.current
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
-    const ctx = canvas.getContext('2d')!
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.92)
-    setBillImage(dataUrl)
-    cancelCamera()
+    
+    // Ensure video has loaded and has dimensions
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      console.error('Video not ready')
+      alert('Camera not ready. Please wait a moment and try again.')
+      return
+    }
+    
+    try {
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      const ctx = canvas.getContext('2d')
+      
+      if (!ctx) {
+        console.error('Cannot get canvas context')
+        return
+      }
+      
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92)
+      setBillImage(dataUrl)
+      cancelCamera()
+      
+      console.log('Photo captured successfully')
+    } catch (error) {
+      console.error('Error capturing photo:', error)
+      alert('Failed to capture photo. Please try again.')
+    }
   }
 
   const loadImageFromFile = async (file: File) => {

@@ -23,10 +23,27 @@ body {
 }
 
 /* Mobile viewport fix */
+html, body {
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
+  width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Ensure mobile takes full screen */
 @media screen and (max-width: 768px) {
-  html, body {
+  html, body, #root {
     height: 100vh;
-    height: 100dvh; /* Dynamic viewport height for mobile */
+    height: 100dvh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  /* Remove any margins/padding on mobile */
+  * {
+    box-sizing: border-box;
   }
 }
 
@@ -77,4 +94,21 @@ body {
 button {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  min-height: 44px; /* Apple's recommended minimum touch target */
+}
+
+/* Mobile safe area support */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Improve mobile font rendering */
+@media screen and (max-width: 768px) {
+  body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
 }

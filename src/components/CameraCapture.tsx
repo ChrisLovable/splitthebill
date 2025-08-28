@@ -26,10 +26,22 @@ export default function CameraCapture({ isCapturing, videoRef, onOpen, onCapture
       )}
       {isCapturing && (
         <div className="space-y-2">
-          <video ref={videoRef} className="w-full rounded" playsInline muted></video>
+          <video ref={videoRef} className="w-full rounded" playsInline muted autoPlay></video>
           <div className="flex gap-2">
-            <button className="flex-1 py-2 rounded bg-emerald-600 text-white" onClick={onCapture}>Capture</button>
-            <button className="flex-1 py-2 rounded bg-neutral-700 text-white" onClick={onCancel}>Cancel</button>
+            <button 
+              className="flex-1 py-3 rounded bg-emerald-600 text-white font-bold touch-manipulation" 
+              onClick={onCapture}
+              style={{ minHeight: '44px' }}
+            >
+              📸 Capture
+            </button>
+            <button 
+              className="flex-1 py-3 rounded bg-neutral-700 text-white font-bold touch-manipulation" 
+              onClick={onCancel}
+              style={{ minHeight: '44px' }}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}

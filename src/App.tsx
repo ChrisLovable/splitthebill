@@ -87,7 +87,8 @@ function App() {
         disabled={state.splitEvenly}
       />
 
-      {/* Remaining bar removed per request */}
+      {/* Hidden canvas for photo capture */}
+      <canvas ref={state.canvasRef} style={{ display: 'none' }}></canvas>
     </PhoneFrame>
   )
 }
