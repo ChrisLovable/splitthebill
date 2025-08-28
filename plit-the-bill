@@ -1,0 +1,5 @@
+[33m7ded3a4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Add extensive debugging: component renders, tip calculation, and browser alert to verify deployment
+[33me04351d[m Add debugging to AmountRemaining component to track tip input changes
+[33m5171c5c[m Fix allocation calculations: prevent double allocation in split evenly mode + add debugging
+[33mbf96e69[m Hide service charges table when charges are 0 - improves UI cleanliness
+[33m55869da[m Remove gallery picker and Run OCR button - OCR now runs automatically after photo capture
