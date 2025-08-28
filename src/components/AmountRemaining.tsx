@@ -15,6 +15,10 @@ type Props = {
 export default function AmountRemaining({ items, charges, tipInput, tipAllocations, splitChargesEvenly, selectedChargeColor, splitTipEvenly, selectedTipColor, splitEvenly }: Props) {
   // Calculate remaining amount: TOTAL EVERYTHING - WHAT'S ALLOCATED
   const displayAmount = (() => {
+    console.log('=== AMOUNT REMAINING DEBUG ===')
+    console.log('tipInput:', tipInput)
+    console.log('splitTipEvenly:', splitTipEvenly)
+    console.log('selectedTipColor:', selectedTipColor)
     // STEP 1: Calculate TOTAL of everything (TIP + SERVICE + ITEMS)
     let totalEverything = 0
     
@@ -60,6 +64,11 @@ export default function AmountRemaining({ items, charges, tipInput, tipAllocatio
     
     // STEP 3: REMAINING = TOTAL - ALLOCATED
     const remaining = totalEverything - allocatedAmount
+    
+    console.log('Total everything:', totalEverything)
+    console.log('Allocated amount:', allocatedAmount)
+    console.log('Remaining:', remaining)
+    console.log('=== END AMOUNT REMAINING DEBUG ===')
     
     // If split evenly is enabled, remaining becomes 0 (everything gets allocated)
     if (splitEvenly) {
