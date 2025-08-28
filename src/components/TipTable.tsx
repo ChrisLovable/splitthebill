@@ -1,5 +1,6 @@
 import CalculatorModal from './CalculatorModal'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import type { BillItem, BillCharge, TipAllocation } from '../types'
 
 type Props = {
   tipAmount: number
@@ -9,12 +10,75 @@ type Props = {
   selectedTipColor: string | null
   setSelectedTipColor: (c: string | null) => void
   activeColor: string | null
+  // Additional props needed to calculate remaining amount
+  items: BillItem[]
+  charges: BillCharge[]
+  tipAllocations: TipAllocation
+  splitChargesEvenly: boolean
+  selectedChargeColor: string | null
+  splitEvenly: boolean
 }
 
-export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setSplitTipEvenly, selectedTipColor, setSelectedTipColor, activeColor }: Props) {
+export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setSplitTipEvenly, selectedTipColor, setSelectedTipColor, activeColor, items, charges, tipAllocations, splitChargesEvenly, selectedChargeColor, splitEvenly }: Props) {
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false)
   
-  console.log('TipTable rendered with tipAmount:', tipAmount)
+  // Calculate remaining amount (same logic as AmountRemaining component)
+  const remainingAmount = useMemo(() => {
+    // STEP 1: Calculate TOTAL of everything (TIP + SERVICE + ITEMS)
+    let totalEverything = 0
+    
+    // ALL ITEMS (original quantities)
+    let itemsTotal = 0
+    for (const item of items) {
+      const allocatedQty = Object.values(item.colorAllocations || {}).reduce((a, b) => a + b, 0)
+      const originalQty = item.quantity + allocatedQty  // item.quantity is remaining, so add back allocated
+      itemsTotal += originalQty * item.unitPrice
+    }
+    totalEverything += itemsTotal
+    
+    // ALL SERVICE CHARGES
+    const totalCharges = charges.reduce((s, c) => s + c.amount, 0)
+    totalEverything += totalCharges
+    
+    // ALL TIP (both input and manual allocations)
+    totalEverything += tipAmount || 0
+    const manualTipTotal = Object.values(tipAllocations).reduce((a, b) => a + b, 0)
+    totalEverything += manualTipTotal
+    
+    // STEP 2: Calculate what's been allocated to colors
+    let allocatedAmount = 0
+    
+    // Allocated items
+    for (const item of items) {
+      const allocatedQty = Object.values(item.colorAllocations || {}).reduce((a, b) => a + b, 0)
+      allocatedAmount += allocatedQty * item.unitPrice
+    }
+    
+    // Allocated charges (if split evenly or assigned to a color)
+    if (totalCharges > 0 && (splitChargesEvenly || selectedChargeColor)) {
+      allocatedAmount += totalCharges
+    }
+    
+    // Allocated tip input (if split evenly or assigned to a color)
+    if (tipAmount > 0 && (splitTipEvenly || selectedTipColor)) {
+      allocatedAmount += tipAmount
+    }
+    
+    // Allocated manual tips (always allocated)
+    allocatedAmount += manualTipTotal
+    
+    // STEP 3: REMAINING = TOTAL - ALLOCATED
+    const remaining = totalEverything - allocatedAmount
+    
+    // If split evenly is enabled, remaining becomes 0 (everything gets allocated)
+    if (splitEvenly) {
+      return 0
+    }
+    
+    return +remaining.toFixed(2)
+  }, [items, charges, tipAmount, tipAllocations, splitChargesEvenly, selectedChargeColor, splitTipEvenly, selectedTipColor, splitEvenly])
+  
+  console.log('TipTable rendered with tipAmount:', tipAmount, 'remainingAmount:', remainingAmount)
   const td: React.CSSProperties = { 
     padding: 8, 
     border: '1px solid #000', 
@@ -127,6 +191,7 @@ export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setS
         currentValue={tipAmount}
         onClose={() => setIsCalculatorOpen(false)}
         onConfirm={(value) => setTipAmount(value)}
+        remainingAmount={remainingAmount}
       />
     </section>
   )

@@ -1,4 +1,5 @@
 import type { RefObject } from 'react'
+import { useRef } from 'react'
 
 type Props = {
   isCapturing: boolean
@@ -6,13 +7,15 @@ type Props = {
   onOpen: () => void
   onCapture: () => void
   onCancel: () => void
+  onFileSelect: (file: File) => void
 }
 
-export default function CameraCapture({ isCapturing, videoRef, onOpen, onCapture, onCancel }: Props) {
+export default function CameraCapture({ isCapturing, videoRef, onOpen, onCapture, onCancel, onFileSelect }: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
   return (
     <section className="space-y-2">
       {!isCapturing && (
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center gap-3">
           <button 
             onClick={onOpen} 
             onTouchStart={() => {}} 
@@ -22,6 +25,29 @@ export default function CameraCapture({ isCapturing, videoRef, onOpen, onCapture
             <span className="shine" aria-hidden />
             OPEN CAMERA
           </button>
+          
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            className="btn-3d relative text-[12px] font-extrabold uppercase touch-manipulation" 
+            style={{ width: 100, height: 50, cursor: 'pointer', background: 'linear-gradient(145deg, #4F46E5, #3730A3)' }}
+          >
+            <span className="shine" aria-hidden />
+            SELECT FILE
+          </button>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) {
+                onFileSelect(file)
+                e.target.value = '' // Reset input
+              }
+            }}
+          />
         </div>
       )}
       {isCapturing && (

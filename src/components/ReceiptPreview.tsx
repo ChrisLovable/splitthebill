@@ -27,6 +27,14 @@ export default function ReceiptPreview({ image, onRunOCR, ocrProgress }: Props) 
       {ocrProgress > 0 && ocrProgress < 100 && (
         <p className="text-center text-white text-sm">Processing receipt... {ocrProgress}%</p>
       )}
+      {ocrProgress === 100 && (
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg">
+            <span className="text-lg">✓</span>
+            <span className="text-sm font-medium">Parsing completed!</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

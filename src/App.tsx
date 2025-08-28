@@ -84,6 +84,7 @@ function App() {
           onOpen={state.startCamera}
           onCapture={state.capturePhoto}
           onCancel={state.cancelCamera}
+          onFileSelect={state.handleFileSelect}
         />
 
       </div>
@@ -108,6 +109,12 @@ function App() {
         selectedTipColor={state.selectedTipColor}
         setSelectedTipColor={state.setSelectedTipColor}
         activeColor={state.activeColor}
+        items={state.items}
+        charges={state.charges}
+        tipAllocations={state.tipAllocations}
+        splitChargesEvenly={state.splitChargesEvenly}
+        selectedChargeColor={state.selectedChargeColor}
+        splitEvenly={state.splitEvenly}
       />
 
       <CustomerSplitControls 

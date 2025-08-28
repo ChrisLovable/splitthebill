@@ -167,7 +167,7 @@ export function useBillState() {
     if (activeColor == null) return
     
     console.log('=== ALLOCATE ONE DEBUG ===')
-    console.log('Allocating item at index:', index, 'to color:', activeColor)
+    console.log('Allocating 1 quantity from item at index:', index, 'to color:', activeColor)
     
     setItems(prev => {
       console.log('Previous items state:', prev)
@@ -176,24 +176,28 @@ export function useBillState() {
       
       console.log('Item before allocation:', item)
       
+      // Only allocate if there's remaining quantity
+      if (item.quantity <= 0) {
+        console.log('No remaining quantity to allocate')
+        return prev // Return unchanged state
+      }
+      
       // Ensure colorAllocations exists
       if (!item.colorAllocations) {
         item.colorAllocations = {}
       }
       
-      const currentAllocations = { ...item.colorAllocations }
-      const totalAllocated = Object.values(currentAllocations).reduce((sum, qty) => sum + qty, 0)
-      const originalQuantity = item.quantity + totalAllocated
-      
-      console.log('Current allocations:', currentAllocations)
-      console.log('Total allocated:', totalAllocated)
-      console.log('Original quantity:', originalQuantity)
-      
-      // Simply allocate the entire original quantity to the active color
-      item.quantity = 0
-      item.colorAllocations = { [activeColor]: originalQuantity }
+      // Allocate exactly 1 quantity to the active color
+      item.quantity = item.quantity - 1
+      item.colorAllocations = { 
+        ...item.colorAllocations, 
+        [activeColor]: (item.colorAllocations[activeColor] || 0) + 1 
+      }
       
       console.log('Item after allocation:', item)
+      console.log('Allocated 1 to color:', activeColor)
+      console.log('Remaining quantity:', item.quantity)
+      console.log('Color allocations:', item.colorAllocations)
       
       newItems[index] = item
       console.log('New items state:', newItems)
@@ -322,6 +326,17 @@ export function useBillState() {
   useEffect(() => { localStorage.setItem('splitChargesEvenly', JSON.stringify(splitChargesEvenly)) }, [splitChargesEvenly])
   useEffect(() => { localStorage.setItem('splitTipEvenly', JSON.stringify(splitTipEvenly)) }, [splitTipEvenly])
 
+  const handleFileSelect = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string
+      if (dataUrl) {
+        setBillImage(dataUrl)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
   const resetAll = () => {
     setBillImage(null)
     setBillText('')
@@ -371,6 +386,7 @@ export function useBillState() {
     setTipInput,
     splitEvenly,
     setSplitEvenly,
+    handleFileSelect,
     resetAll,
   }
 }
