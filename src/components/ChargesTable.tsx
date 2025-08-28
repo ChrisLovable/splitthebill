@@ -11,6 +11,9 @@ type Props = {
 }
 
 export default function ChargesTable({ charges, splitChargesEvenly, setSplitChargesEvenly, colors, selectedChargeColor, setSelectedChargeColor, activeColor }: Props) {
+  // Don't show table if no charges or all charges are 0
+  const totalCharges = charges.reduce((sum, charge) => sum + charge.amount, 0)
+  if (totalCharges === 0) return null
 
   const td: React.CSSProperties = { 
     padding: 8, 
@@ -19,7 +22,6 @@ export default function ChargesTable({ charges, splitChargesEvenly, setSplitChar
     fontSize: 16,
     fontWeight: 'bold'
   }
-  const totalCharges = (charges || []).reduce((s, c) => s + (c.amount || 0), 0)
   const labelColor = '#111'
 
   const handleAllocate = () => {
