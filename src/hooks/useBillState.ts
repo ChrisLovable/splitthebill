@@ -209,6 +209,13 @@ export function useBillState() {
     const visibleColors = userColors.slice(0, Math.max(1, numPersons))
     for (const color of visibleColors) totals[color] = 0
 
+    console.log('=== ALLOCATION DEBUG ===')
+    console.log('Split evenly:', splitEvenly)
+    console.log('Split charges evenly:', splitChargesEvenly)  
+    console.log('Split tip evenly:', splitTipEvenly)
+    console.log('Selected charge color:', selectedChargeColor)
+    console.log('Selected tip color:', selectedTipColor)
+
     // Normal allocation logic - start with what's already allocated
     for (const it of items) {
       for (const [color, qty] of Object.entries(it.colorAllocations || {})) {
@@ -253,21 +260,14 @@ export function useBillState() {
       // Calculate remaining unallocated amount
       let remainingAmount = 0
       
-      // Unallocated items
+      // Unallocated items only (since charges and tips are already handled above when splitEvenly is true)
       for (const item of items) {
         const unallocatedQty = item.quantity
         remainingAmount += unallocatedQty * item.unitPrice
       }
       
-      // Unallocated charges
-      if (totalCharges > 0 && !splitChargesEvenly && !selectedChargeColor) {
-        remainingAmount += totalCharges
-      }
-      
-      // Unallocated tip
-      if (tipInput > 0 && !splitTipEvenly && !selectedTipColor) {
-        remainingAmount += tipInput
-      }
+      // Note: charges and tips are already allocated evenly above due to splitChargesEvenly=true and splitTipEvenly=true
+      // So we only need to handle remaining unallocated items
       
       // Split the remaining amount evenly among all visible colors
       if (remainingAmount > 0) {
@@ -277,6 +277,9 @@ export function useBillState() {
         }
       }
     }
+
+    console.log('Final totals:', totals)
+    console.log('=== END ALLOCATION DEBUG ===')
 
     return totals
   }, [items, tipAllocations, userColors, numPersons, splitChargesEvenly, charges, selectedChargeColor, tipInput, splitTipEvenly, selectedTipColor, splitEvenly])
