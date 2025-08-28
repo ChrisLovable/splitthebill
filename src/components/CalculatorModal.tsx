@@ -5,10 +5,10 @@ type Props = {
   currentValue: number
   onClose: () => void
   onConfirm: (value: number) => void
-  billTotal?: number
+  remainingAmount?: number
 }
 
-export default function CalculatorModal({ isOpen, currentValue, onClose, onConfirm, billTotal = 0 }: Props) {
+export default function CalculatorModal({ isOpen, currentValue, onClose, onConfirm, remainingAmount = 0 }: Props) {
   const [display, setDisplay] = useState(currentValue > 0 ? currentValue.toFixed(2) : '0')
   const [hasDecimal, setHasDecimal] = useState(currentValue > 0 ? true : false)
   const [previousValue, setPreviousValue] = useState<number | null>(null)
@@ -98,7 +98,7 @@ export default function CalculatorModal({ isOpen, currentValue, onClose, onConfi
   }
 
   const handlePercentage = (percentage: number) => {
-    const tipAmount = (billTotal * percentage) / 100
+    const tipAmount = (remainingAmount * percentage) / 100
     setDisplay(tipAmount.toFixed(2))
     setHasDecimal(true)
     setPreviousValue(null)
@@ -182,8 +182,8 @@ export default function CalculatorModal({ isOpen, currentValue, onClose, onConfi
         border: '3px solid #000',
         borderStyle: 'outset',
         boxShadow: '0 8px 16px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,255,255,0.3), inset 0 -2px 6px rgba(0,0,0,0.1)',
-        minWidth: '220px',
-        maxWidth: '240px'
+        minWidth: '280px',
+        maxWidth: '300px'
       }}>
         {/* Display */}
         <div style={{
@@ -205,7 +205,7 @@ export default function CalculatorModal({ isOpen, currentValue, onClose, onConfi
 
         {/* Row 1: Operations - Centered */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', maxWidth: '240px', width: '100%' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', maxWidth: '280px', width: '100%' }}>
             <button style={operationButtonStyle} onClick={() => handleOperation('+')}>+</button>
             <button style={operationButtonStyle} onClick={() => handleOperation('-')}>-</button>
             <button style={operationButtonStyle} onClick={() => handleOperation('×')}>×</button>
@@ -216,7 +216,7 @@ export default function CalculatorModal({ isOpen, currentValue, onClose, onConfi
 
         {/* Percentage Buttons */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', maxWidth: '200px', width: '100%' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', maxWidth: '240px', width: '100%' }}>
             <button style={{...operationButtonStyle, fontSize: '10px', background: 'linear-gradient(145deg, #00AA44, #008833)'}} onClick={() => handlePercentage(5)}>5%</button>
             <button style={{...operationButtonStyle, fontSize: '10px', background: 'linear-gradient(145deg, #00AA44, #008833)'}} onClick={() => handlePercentage(10)}>10%</button>
             <button style={{...operationButtonStyle, fontSize: '10px', background: 'linear-gradient(145deg, #00AA44, #008833)'}} onClick={() => handlePercentage(15)}>15%</button>

@@ -13,13 +13,16 @@ type Props = {
 }
 
 export default function AmountRemaining({ items, charges, tipInput, tipAllocations, splitChargesEvenly, selectedChargeColor, splitTipEvenly, selectedTipColor, splitEvenly }: Props) {
+  console.log('=== AmountRemaining RENDER ===')
   console.log('AmountRemaining component rendered with tipInput:', tipInput)
-  
-  // Alert on first render to test if debugging is working
-  if (typeof window !== 'undefined' && !(window as any).debugAlertShown) {
-    (window as any).debugAlertShown = true
-    alert('Debug: AmountRemaining component loaded!')
-  }
+  console.log('Items:', items)
+  console.log('Charges:', charges) 
+  console.log('TipAllocations:', tipAllocations)
+  console.log('splitChargesEvenly:', splitChargesEvenly)
+  console.log('selectedChargeColor:', selectedChargeColor)
+  console.log('splitTipEvenly:', splitTipEvenly)
+  console.log('selectedTipColor:', selectedTipColor)
+  console.log('splitEvenly:', splitEvenly)
   
   // Calculate remaining amount: TOTAL EVERYTHING - WHAT'S ALLOCATED
   const displayAmount = (() => {

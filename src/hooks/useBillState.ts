@@ -166,9 +166,15 @@ export function useBillState() {
   const allocateOne = (index: number) => {
     if (activeColor == null) return
     
+    console.log('=== ALLOCATE ONE DEBUG ===')
+    console.log('Allocating item at index:', index, 'to color:', activeColor)
+    
     setItems(prev => {
+      console.log('Previous items state:', prev)
       const newItems = [...prev]
       const item = { ...newItems[index] }
+      
+      console.log('Item before allocation:', item)
       
       // Ensure colorAllocations exists
       if (!item.colorAllocations) {
@@ -179,11 +185,19 @@ export function useBillState() {
       const totalAllocated = Object.values(currentAllocations).reduce((sum, qty) => sum + qty, 0)
       const originalQuantity = item.quantity + totalAllocated
       
+      console.log('Current allocations:', currentAllocations)
+      console.log('Total allocated:', totalAllocated)
+      console.log('Original quantity:', originalQuantity)
+      
       // Simply allocate the entire original quantity to the active color
       item.quantity = 0
       item.colorAllocations = { [activeColor]: originalQuantity }
       
+      console.log('Item after allocation:', item)
+      
       newItems[index] = item
+      console.log('New items state:', newItems)
+      console.log('=== END ALLOCATE ONE DEBUG ===')
       return newItems
     })
   }
