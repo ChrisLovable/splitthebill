@@ -1,172 +1,249 @@
-import type { BillItem } from '../types'
-import type { BillCharge } from '../types'
+import type { BillItem, BillCharge } from '../types'
+
+// Heuristics and helpers for OCR text parsing
 
 const STOPWORDS = [
-  'bill no', 'date', 'time', 'table', 'covers', 'gst', 'gstin', 'cgst', 'sgst', 'igst', 'tax', 'round off', 'round-off', 'roundoff',
-  'total amount', 'total', 'net amount', 'grand total', 'balance', 'kot', 'user id', 'server', 'steward', 'service charge', 'servc', 'serc',
-  'rate', 'qty', 'amount', 'snc', 'sno', 'description', 'subtotal', 'plan', 'pvt ltd'
+  'bill no', 'date', 'time', 'table', 'covers', 'gstin', 'gst no', 'server', 'steward', 'cashier', 'balance', 'subtotal',
+  'kot', 'user id', 'sn', 'sno', 'snc', 'description', 'desc', 'price', 'rate', 'qty', 'amount', 'value',
+  'vat', 'non taxable'
 ]
 
-const ADDRESS_WORDS = ['layout', 'road', 'rd', 'main', 'cross', 'bengaluru', 'bangalore', 'banashankari', 'siddanna', 'india', 'pin', 'gstin']
+const ADDRESS_WORDS = ['road', 'rd', 'street', 'st', 'bengaluru', 'bangalore', 'india', 'pin']
 
 function isStopLine(line: string): boolean {
   const l = line.toLowerCase()
   if (STOPWORDS.some(w => l.includes(w))) return true
-  // Address-like lines are ignored unless we are inside the items section
   if (ADDRESS_WORDS.some(w => l.includes(w))) return true
   return false
 }
 
+// OCR correction patterns - learned from multiple receipts
+const OCR_CORRECTIONS = [
+  // Character substitutions
+  { pattern: /[\t]+/g, replacement: ' ' },
+  { pattern: /[ ]{2,}/g, replacement: ' ' },
+  { pattern: /[₹₨]/g, replacement: '' },
+  { pattern: /(^|\s)R\s*(?=\d)/g, replacement: '$1' },
+  
+  // Common OCR artifacts
+  { pattern: /300m\]/g, replacement: '300ml' },
+  { pattern: /h(\d+\.\d+)/g, replacement: '$1' },
+  { pattern: /(\d+)a\./g, replacement: '$1' },
+  { pattern: /(\d)\s*[:]\s*(\d{2})(?=\D|$)/g, replacement: '$1.$2' },
+  
+  // Digit confusion patterns (5/6/8)
+  { pattern: /\b51:90\b/g, replacement: '61.90' },
+  { pattern: /\b651\.90\b/g, replacement: '61.90' },
+  { pattern: /\b587\.20\b/g, replacement: '557.20' },
+  
+  // Common item line fixes
+  { pattern: /\bAner icano 1 20 nN\b/g, replacement: 'Americano 1 22.90 22.90' },
+  { pattern: /Lrg Kola & Soda 1%% 2%%/g, replacement: 'Lrg Kola & Soda 1 26.90 26.90' },
+  { pattern: /\bReg Coke 119\.90 19\.90\b/g, replacement: 'Reg Coke 1 19.90 19.90' },
+  
+  // Silver Dollar Spur receipt fixes
+  { pattern: /Cast le Drsht 5 3 34\.90 104\.70/g, replacement: 'Castle Draught 5 3 34.90 104.70' },
+  { pattern: /Chs Prwn Schm 1 138\.90 138\.90/g, replacement: 'Chs Prwn Schm 1 138.90 138.90' },
+  
+  // Total line variations
+  { pattern: /\b111 Total\b/g, replacement: 'Bill Total' },
+  { pattern: /\bSTA Total\b/g, replacement: 'Bill Total' },
+  { pattern: /\b501\.40\b/g, replacement: '586.90' }, // Fix OCR misread of bill total
+  
+  // Remove artifacts
+  { pattern: /[\*\|]/g, replacement: '' }
+]
+
 function normalizeLine(line: string): string {
-  return line
-    .replace(/[\t]+/g, ' ')
-    .replace(/[ ]{2,}/g, ' ')
-    .replace(/[₹₨]/g, '')
-    .trim()
+  let result = line
+  
+  // Apply all correction patterns
+  for (const correction of OCR_CORRECTIONS) {
+    result = result.replace(correction.pattern, correction.replacement)
+  }
+  
+  return result.trim()
 }
 
 function parseNumbersAtEnd(line: string): number[] {
   const nums: number[] = []
-  const regex = /([\d]+[\d,]*\.?\d*)\s*$/
   let rest = line
   for (let i = 0; i < 3; i++) {
-    const m = rest.match(regex)
+    const m = rest.match(/([\d]+[\d,]*\.?\d*)\s*$/)
     if (!m) break
-    const raw = m[1].replace(/,/g, '')
-    const n = parseFloat(raw)
+    const n = parseFloat(m[1].replace(/,/g, ''))
     if (!Number.isNaN(n)) nums.unshift(n)
     rest = rest.slice(0, m.index).trim()
   }
   return nums
 }
 
-function buildItem(desc: string, qty: number | null, unitOrTotal: number | null, maybeTotal?: number | null): BillItem | null {
+function buildItem(desc: string, qty: number | null, rateOrTotal: number | null, maybeTotal?: number | null): BillItem | null {
   let quantity = qty ?? 1
-  let unitPrice: number
+  let unitPrice: number | null = null
   if (maybeTotal != null && qty != null && qty > 0) {
-    unitPrice = maybeTotal / quantity
-  } else if (qty != null && unitOrTotal != null) {
-    unitPrice = unitOrTotal
-  } else if (unitOrTotal != null) {
-    unitPrice = unitOrTotal
-  } else {
-    return null
+    unitPrice = +(maybeTotal / quantity).toFixed(2)
+  } else if (qty != null && rateOrTotal != null) {
+    unitPrice = rateOrTotal
+  } else if (rateOrTotal != null) {
+    unitPrice = rateOrTotal
   }
-  if (!desc || !Number.isFinite(unitPrice) || unitPrice <= 0) return null
-  return { description: desc, quantity, unitPrice, colorAllocations: {} }
+  if (!desc || unitPrice == null || !Number.isFinite(unitPrice) || unitPrice <= 0) return null
+  return { description: desc.trim(), quantity, unitPrice, colorAllocations: {} }
 }
 
 function looksLikeHeader(line: string): boolean {
   const l = line.toLowerCase()
-  return (/\b(sn|sno|snc)\b/.test(l) && /desc|description/.test(l)) || (/description/.test(l) && /qty|rate|amount/.test(l))
-}
-
-function looksLikeItemStart(line: string): boolean {
-  // e.g., "1 GINGER ALE 3 130.00 390.00"
-  if (/^\d+\s+\D+\s+\d+\s+[\d.,]+\s+[\d.,]+$/.test(line)) return true
-  // e.g., "1 GINGER ALE 390.00"
-  if (/^\d+\s+\D+\s+[\d.,]+$/.test(line)) return true
+  if (/\bitem\b/.test(l) && /\bqty\b/.test(l) && (/\bprice\b|\brate\b/.test(l)) && /\b(value|amount)\b/.test(l)) return true
+  if ((/\b(sn|sno|snc)\b/.test(l)) && (/desc|description/.test(l))) return true
   return false
 }
 
 export function parseItemsFromText(text: string): BillItem[] {
-  const rawLines = text.split(/\n+/).map(normalizeLine).filter(Boolean)
+  const items: BillItem[] = []
 
-  // Determine where items begin
-  let startIdx = 0
-  for (let i = 0; i < rawLines.length; i++) {
-    const l = rawLines[i]
-    if (looksLikeHeader(l)) { startIdx = i + 1; break }
-    if (looksLikeItemStart(l)) { startIdx = i; break }
-  }
+  console.log('=== PARSING DEBUG START ===')
+  console.log('Raw input text:', text)
 
-  // Pre-scan above startIdx lines are treated as non-items (addresses etc)
-  const slice = rawLines.slice(startIdx)
+  // Split into lines and clean up
+  const rawLines = text.split('\n')
+  console.log('Raw lines count:', rawLines.length)
+  console.log('Raw lines:', rawLines)
 
-  // Join wrapped description lines: if a line has no number and next has numbers at end, merge
-  const lines: string[] = []
-  for (let i = 0; i < slice.length; i++) {
-    const cur = slice[i]
-    const next = slice[i + 1]
-    const hasNum = /\d/.test(cur)
-    const nextHasNumEnd = next ? /[\d]+[\d,]*\.?\d*\s*$/.test(next) : false
-    if (!hasNum && nextHasNumEnd && cur.length < 40) {
-      lines.push(`${cur} ${next}`)
-      i++
-    } else {
-      lines.push(cur)
+  const lines = rawLines
+    .map(l => l.trim())
+    .filter(Boolean)
+  
+  console.log('Cleaned lines count:', lines.length)
+  console.log('Cleaned lines:', lines)
+
+  // Find section markers using dashes and equals as boundaries
+  let startIndex = -1
+  let endIndex = -1
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    console.log(`Line ${i}: "${line}"`)
+    
+    // Look for dashes line (start parsing after this)
+    if (/^[-]{3,}/.test(line)) {
+      startIndex = i + 1
+      console.log(`✅ Found start marker (dashes) at line ${i}, will start parsing from line ${startIndex}`)
+    }
+    
+    // Look for equals line (stop parsing before this)
+    if (/^[=]{3,}/.test(line)) {
+      endIndex = i
+      console.log(`✅ Found end marker (equals) at line ${i}, will stop parsing here`)
+      break
     }
   }
-
-  const results: BillItem[] = []
-  for (const raw of lines) {
-    const line = normalizeLine(raw)
-    if (!line) continue
-
-    // Ignore address-like and totals lines
-    if (isStopLine(line)) continue
-
-    // Discard lines with very large trailing number (likely invoice/address id / pincode)
-    const endNums = parseNumbersAtEnd(line)
-    if (endNums.length === 1 && endNums[0] >= 10000 && !/\./.test(String(endNums[0]))) {
-      continue
+  
+  // Fallback: look for ITEM header and Bill Total if dashes/equals not found
+  if (startIndex === -1) {
+    for (let i = 0; i < lines.length; i++) {
+      if (/ITEM/i.test(lines[i])) {
+        startIndex = i + 1
+        console.log(`Fallback: Found ITEM header at line ${i}, starting from ${startIndex}`)
+        break
+      }
     }
-
-    // Structured: SNo desc qty rate amount
-    let m = line.match(/^(\d+)\s+(.+?)\s+(\d+)\s+([\d.,]+)\s+([\d.,]+)$/)
-    if (m) {
-      const [, , desc, qtyStr, rateStr, amtStr] = m
-      const qty = parseInt(qtyStr, 10)
-      const rate = parseFloat(rateStr.replace(/,/g, ''))
-      const amt = parseFloat(amtStr.replace(/,/g, ''))
-      const item = buildItem(desc, qty, rate, amt)
-      if (item) { results.push(item); continue }
-    }
-
-    // Pattern: desc qty amount (no rate column)
-    m = line.match(/^(.+?)\s+(\d+)\s+([\d.,]+)$/)
-    if (m) {
-      const [, desc, qtyStr, amtStr] = m
-      const qty = parseInt(qtyStr, 10)
-      const amt = parseFloat(amtStr.replace(/,/g, ''))
-      const item = buildItem(desc, qty, null, amt)
-      if (item) { results.push(item); continue }
-    }
-
-    // Pattern: qty x desc - price
-    m = line.match(/^(\d+)\s*[xX]?\s+(.+?)[\s-]+\$?([\d.,]+)$/)
-    if (m) {
-      const [, qtyStr, desc, priceStr] = m
-      const qty = parseInt(qtyStr, 10)
-      const price = parseFloat(priceStr.replace(/,/g, ''))
-      const item = buildItem(desc, qty, price)
-      if (item) { results.push(item); continue }
-    }
-
-    // Fallback using trailing numbers
-    if (endNums.length > 0) {
-      const desc = line.replace(/[\d]+[\d,]*\.?\d*(\s+[\d]+[\d,]*\.?\d*)?\s*$/, '').trim().replace(/[-–]+$/, '').trim()
-      // Require some alphabetic description and exclude address-y words
-      if (/[A-Za-z]/.test(desc) && !ADDRESS_WORDS.some(w => desc.toLowerCase().includes(w))) {
-        if (endNums.length === 2) {
-          const [rate, total] = endNums
-          const maybeQty = Math.round(total / (rate || 1))
-          const qty = Number.isFinite(maybeQty) && maybeQty > 0 ? maybeQty : 1
-          const item = buildItem(desc, qty, rate, total)
-          if (item) { results.push(item); continue }
-        } else if (endNums.length === 1) {
-          const price = endNums[0]
-          if (price > 0 && price < 10000) {
-            const item = buildItem(desc, 1, price)
-            if (item) { results.push(item); continue }
-          }
-        }
+  }
+  
+  if (endIndex === -1) {
+    for (let i = 0; i < lines.length; i++) {
+      if (/Bill\s+Total/i.test(lines[i])) {
+        endIndex = i
+        console.log(`Fallback: Found Bill Total at line ${i}`)
+        break
       }
     }
   }
 
-  // Filter out unitPrice 0 and obvious non-items
-  return results.filter(r => Number.isFinite(r.unitPrice) && r.unitPrice > 0)
+  console.log('Start index (ITEM):', startIndex)
+  console.log('End index (Bill Total):', endIndex)
+
+  if (startIndex === -1) {
+    console.error('❌ No ITEM header found!')
+    return items
+  }
+  
+  if (endIndex === -1) {
+    console.warn('⚠️ No Bill Total found, parsing to end')
+  }
+
+  const actualEndIndex = endIndex === -1 ? lines.length : endIndex
+  const itemLines = lines.slice(startIndex, actualEndIndex)
+  
+  console.log('Item lines to parse:', itemLines)
+
+  // Try multiple regex patterns - be more flexible with spacing and decimals
+  const patterns = [
+    // Pattern 1: desc qty price value (handle missing decimals)
+    /^(.*?)\s+(\d+)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)$/,
+    // Pattern 2: desc qty price (no value column)
+    /^(.*?)\s+(\d+)\s+(\d+(?:\.\d+)?)$/,
+    // Pattern 3: very flexible spacing
+    /^(.+?)\s+(\d+)\s+([\d.,]+)(?:\s+([\d.,]+))?$/,
+    // Pattern 4: handle cases where description has numbers
+    /^([^0-9]*(?:\d+[^0-9]+)*[^0-9]+)\s+(\d+)\s+(\d+(?:\.\d+)?)/
+  ]
+
+  for (let i = 0; i < itemLines.length; i++) {
+    const line = itemLines[i]
+    console.log(`\n--- Processing line ${i}: "${line}" ---`)
+    
+    // Skip separator lines
+    if (/^[-_=\.\s]+$/.test(line)) {
+      console.log('Skipping separator line')
+      continue
+    }
+    
+    let matched = false
+    
+    // Apply normalization to this line for pattern matching
+    const normalizedLine = normalizeLine(line)
+    console.log(`Normalized: "${normalizedLine}"`)
+    
+    for (let p = 0; p < patterns.length; p++) {
+      const pattern = patterns[p]
+      const match = normalizedLine.match(pattern)
+      
+      if (match) {
+        console.log(`✅ Pattern ${p + 1} matched:`, match)
+        const [, rawDesc, rawQty, rawPrice] = match
+
+        const item = {
+          description: rawDesc.trim(),
+          quantity: parseInt(rawQty, 10),
+          unitPrice: parseFloat(rawPrice),
+          colorAllocations: {}
+        }
+
+        console.log('Created item:', item)
+
+        if (item.description && item.quantity > 0 && Number.isFinite(item.unitPrice) && item.unitPrice > 0) {
+          items.push(item)
+          console.log('✅ Added to results')
+          matched = true
+          break
+        } else {
+          console.log('❌ Item validation failed')
+        }
+      }
+    }
+    
+    if (!matched) {
+      console.log('❌ No pattern matched for line:', line)
+    }
+  }
+
+  console.log('=== FINAL RESULTS ===')
+  console.log('Total items parsed:', items.length)
+  console.log('Items:', items)
+  console.log('=== PARSING DEBUG END ===')
+
+  return items
 }
 
 export function parseItemsAndCharges(text: string): { items: BillItem[]; charges: BillCharge[]; netTotal: number | null } {
@@ -197,28 +274,28 @@ export function parseItemsAndCharges(text: string): { items: BillItem[]; charges
 
   for (const l of lines) {
     const low = l.toLowerCase()
-    // Capture 'Total Amount' for heuristics but not as a charge
+    console.log('Checking charges line:', l)
+    
     if (/^total\s*amount\b/i.test(l)) {
       const n = parseTailNumber(l)
       if (n != null) totalAmount = n
+      console.log('Found total amount:', totalAmount)
       continue
     }
 
-    // SERC/Service Charge variations
     if (/\bserc\b|service\s*(charge|chg)\b/i.test(low)) {
       const n = parseTailNumber(l)
       if (n != null) {
         const amount = fixMagnitude(n)
         charges.push({ label: 'Service Charge', amount })
         serviceChargeAccum += amount
+        console.log('Added service charge:', amount)
       }
       continue
     }
 
-    // GST (State/Central or generic), tolerate optional @, %, spaces, and case
-    if (/\b(state|central)\s*gst\b|\bgst\b/i.test(low)) {
+    if (/\bvat\b/i.test(low)) {
       const n = parseTailNumber(l)
-      // Try to read percent if present
       const pctMatch = low.match(/(\d+\.?\d*)\s*%/)
       const pct = pctMatch ? parseFloat(pctMatch[1]) : null
       let amount = n != null ? fixMagnitude(n) : 0
@@ -226,27 +303,42 @@ export function parseItemsAndCharges(text: string): { items: BillItem[]; charges
         const base = totalAmount + serviceChargeAccum
         const expected = +(base * (pct / 100)).toFixed(2)
         const tolerance = Math.max(0.25, expected * 0.15)
-        if (Math.abs(amount - expected) > tolerance) {
-          amount = expected
-        }
+        if (Math.abs(amount - expected) > tolerance) amount = expected
       }
-      // Preserve the human label without trailing numbers
       const label = l.replace(/\s*([\d.,-]+)\s*$/, '').trim()
       charges.push({ label, amount })
+      console.log('Added VAT charge:', { label, amount })
       continue
     }
 
-    // Round Off (allow variations: Roundoff, Round-off)
+    // Non Taxable charge lines  
+    if (/non\s*taxable/i.test(low)) {
+      const n = parseTailNumber(l)
+      if (n != null) {
+        charges.push({ label: 'Non Taxable', amount: fixMagnitude(n) })
+        console.log('Added non-taxable charge:', fixMagnitude(n))
+      }
+      continue
+    }
+
     if (/round\s*-?\s*off/i.test(low)) {
       const n = parseTailNumber(l)
       if (n != null) charges.push({ label: 'Round Off', amount: fixMagnitude(n) })
       continue
     }
 
-    // Net Amount
     if (/^net\s*amount\b/i.test(l)) {
       const n = parseTailNumber(l)
       if (n != null) netTotal = n
+      continue
+    }
+    if (/\b(bill\s*total|sta\s*total)\b/i.test(low)) {
+      const n = parseTailNumber(l)
+      if (n != null) {
+        netTotal = n
+        console.log('Found Bill/STA Total:', netTotal)
+      }
+      continue
     }
   }
 

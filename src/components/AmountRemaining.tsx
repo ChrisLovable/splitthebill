@@ -1,4 +1,5 @@
 import type { BillItem, BillCharge, TipAllocation } from '../types'
+import { useMemo } from 'react'
 
 type Props = {
   items: BillItem[]
@@ -13,23 +14,22 @@ type Props = {
 }
 
 export default function AmountRemaining({ items, charges, tipInput, tipAllocations, splitChargesEvenly, selectedChargeColor, splitTipEvenly, selectedTipColor, splitEvenly }: Props) {
-  console.log('=== AmountRemaining RENDER ===')
-  console.log('AmountRemaining component rendered with tipInput:', tipInput)
-  console.log('Items:', items)
-  console.log('Charges:', charges) 
-  console.log('TipAllocations:', tipAllocations)
-  console.log('splitChargesEvenly:', splitChargesEvenly)
-  console.log('selectedChargeColor:', selectedChargeColor)
-  console.log('splitTipEvenly:', splitTipEvenly)
-  console.log('selectedTipColor:', selectedTipColor)
-  console.log('splitEvenly:', splitEvenly)
+  console.log('[AmountRemaining] RENDER')
+  console.log('[AmountRemaining] component rendered with tipInput:', tipInput)
+  console.log('[AmountRemaining] Items:', items)
+  console.log('[AmountRemaining] Charges:', charges) 
+  console.log('[AmountRemaining] TipAllocations:', tipAllocations)
+  console.log('[AmountRemaining] splitChargesEvenly:', splitChargesEvenly)
+  console.log('[AmountRemaining] selectedChargeColor:', selectedChargeColor)
+  console.log('[AmountRemaining] splitTipEvenly:', splitTipEvenly)
+  console.log('[AmountRemaining] selectedTipColor:', selectedTipColor)
+  console.log('[AmountRemaining] splitEvenly:', splitEvenly)
   
-  // Calculate remaining amount: TOTAL EVERYTHING - WHAT'S ALLOCATED
-  const displayAmount = (() => {
-    console.log('=== AMOUNT REMAINING DEBUG ===')
-    console.log('tipInput:', tipInput)
-    console.log('splitTipEvenly:', splitTipEvenly)
-    console.log('selectedTipColor:', selectedTipColor)
+  const totals = useMemo(() => {
+    console.log('[AmountRemaining] === AMOUNT REMAINING DEBUG ===')
+    console.log('[AmountRemaining] tipInput:', tipInput)
+    console.log('[AmountRemaining] splitTipEvenly:', splitTipEvenly)
+    console.log('[AmountRemaining] selectedTipColor:', selectedTipColor)
     // STEP 1: Calculate TOTAL of everything (TIP + SERVICE + ITEMS)
     let totalEverything = 0
     
@@ -42,14 +42,14 @@ export default function AmountRemaining({ items, charges, tipInput, tipAllocatio
     }
     totalEverything += itemsTotal
     
-    // ALL SERVICE CHARGES
-    const totalCharges = charges.reduce((s, c) => s + c.amount, 0)
-    totalEverything += totalCharges
+    // ONLY SERVICE CHARGES (exclude VAT, taxes, etc.)
+    const isService = (label: string) => /service\s*(charge|chg)|\bserc\b/i.test(label)
+    const serviceChargeTotal = charges.filter(c => isService(c.label)).reduce((s, c) => s + c.amount, 0)
+    totalEverything += serviceChargeTotal
     
     // ALL TIP (both input and manual allocations)
-    totalEverything += tipInput || 0
     const manualTipTotal = Object.values(tipAllocations).reduce((a, b) => a + b, 0)
-    totalEverything += manualTipTotal
+    totalEverything += tipInput || 0
     
     // STEP 2: Calculate what's been allocated to colors
     let allocatedAmount = 0
@@ -61,8 +61,8 @@ export default function AmountRemaining({ items, charges, tipInput, tipAllocatio
     }
     
     // Allocated charges (if split evenly or assigned to a color)
-    if (totalCharges > 0 && (splitChargesEvenly || selectedChargeColor)) {
-      allocatedAmount += totalCharges
+    if (serviceChargeTotal > 0 && (splitChargesEvenly || selectedChargeColor)) {
+      allocatedAmount += serviceChargeTotal
     }
     
     // Allocated tip input (if split evenly or assigned to a color)
@@ -76,18 +76,18 @@ export default function AmountRemaining({ items, charges, tipInput, tipAllocatio
     // STEP 3: REMAINING = TOTAL - ALLOCATED
     const remaining = totalEverything - allocatedAmount
     
-    console.log('Total everything:', totalEverything)
-    console.log('Allocated amount:', allocatedAmount)
-    console.log('Remaining:', remaining)
-    console.log('=== END AMOUNT REMAINING DEBUG ===')
+    console.log('[AmountRemaining] Total everything:', totalEverything)
+    console.log('[AmountRemaining] Allocated amount:', allocatedAmount)
+    console.log('[AmountRemaining] Remaining:', remaining)
+    console.log('[AmountRemaining] === END AMOUNT REMAINING DEBUG ===')
     
     // If split evenly is enabled, remaining becomes 0 (everything gets allocated)
     if (splitEvenly) {
-      return 0
+      return { total: +totalEverything.toFixed(2), remaining: 0 }
     }
-    
-    return +remaining.toFixed(2)
-  })()
+
+    return { total: +totalEverything.toFixed(2), remaining: +remaining.toFixed(2) }
+  }, [items, charges, tipInput, tipAllocations, splitChargesEvenly, selectedChargeColor, splitTipEvenly, selectedTipColor, splitEvenly])
 
   return (
     <div style={{ padding: '8px', display: 'flex', justifyContent: 'center' }}>
@@ -109,8 +109,8 @@ export default function AmountRemaining({ items, charges, tipInput, tipAllocatio
         justifyContent: 'center',
         gap: '4px'
       }}>
-        <span style={{ fontSize: '14px', fontWeight: 'normal' }}>Amount Remaining</span>
-        <span style={{ fontSize: '24px', fontWeight: 'bold' }}>R{displayAmount.toFixed(2)}</span>
+        <span style={{ fontSize: '14px', fontWeight: 'normal' }}>AMOUNT REMAINING</span>
+        <span style={{ fontSize: '24px', fontWeight: 'bold' }}>R{totals.remaining.toFixed(2)}</span>
       </button>
     </div>
   )

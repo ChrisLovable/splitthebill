@@ -34,6 +34,19 @@ export default function CameraCapture({ isCapturing, videoRef, onOpen, onCapture
             <span className="shine" aria-hidden />
             SELECT FILE
           </button>
+
+          <button 
+            onClick={() => {
+              onOpen();
+              // After opening camera, auto-capture on long bills can be provided by user tapping Capture
+              // This button is an explicit entry point for scanning long/complex bills
+            }}
+            className="btn-3d relative text-[12px] font-extrabold uppercase touch-manipulation" 
+            style={{ width: 100, height: 50, cursor: 'pointer', background: 'linear-gradient(145deg, #0ea5e9, #0284c7)' }}
+          >
+            <span className="shine" aria-hidden />
+            SCAN RECEIPT
+          </button>
           
           <input
             ref={fileInputRef}

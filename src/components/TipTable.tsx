@@ -1,6 +1,6 @@
 import CalculatorModal from './CalculatorModal'
-import { useState, useMemo } from 'react'
-import type { BillItem, BillCharge, TipAllocation } from '../types'
+import { useState } from 'react'
+import type { BillItem } from '../types'
 
 type Props = {
   tipAmount: number
@@ -10,75 +10,22 @@ type Props = {
   selectedTipColor: string | null
   setSelectedTipColor: (c: string | null) => void
   activeColor: string | null
-  // Additional props needed to calculate remaining amount
-  items: BillItem[]
-  charges: BillCharge[]
-  tipAllocations: TipAllocation
-  splitChargesEvenly: boolean
-  selectedChargeColor: string | null
-  splitEvenly: boolean
+  // Optional legacy prop to prevent runtime errors if stale bundle passes it
+  items?: BillItem[]
+  // Base used for percentage buttons (e.g., items total + service charges)
+  percentBase?: number
 }
 
-export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setSplitTipEvenly, selectedTipColor, setSelectedTipColor, activeColor, items, charges, tipAllocations, splitChargesEvenly, selectedChargeColor, splitEvenly }: Props) {
+export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setSplitTipEvenly, selectedTipColor, setSelectedTipColor, activeColor, items, percentBase = 0 }: Props) {
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false)
   
-  // Calculate remaining amount (same logic as AmountRemaining component)
-  const remainingAmount = useMemo(() => {
-    // STEP 1: Calculate TOTAL of everything (TIP + SERVICE + ITEMS)
-    let totalEverything = 0
-    
-    // ALL ITEMS (original quantities)
-    let itemsTotal = 0
-    for (const item of items) {
-      const allocatedQty = Object.values(item.colorAllocations || {}).reduce((a, b) => a + b, 0)
-      const originalQty = item.quantity + allocatedQty  // item.quantity is remaining, so add back allocated
-      itemsTotal += originalQty * item.unitPrice
-    }
-    totalEverything += itemsTotal
-    
-    // ALL SERVICE CHARGES
-    const totalCharges = charges.reduce((s, c) => s + c.amount, 0)
-    totalEverything += totalCharges
-    
-    // ALL TIP (both input and manual allocations)
-    totalEverything += tipAmount || 0
-    const manualTipTotal = Object.values(tipAllocations).reduce((a, b) => a + b, 0)
-    totalEverything += manualTipTotal
-    
-    // STEP 2: Calculate what's been allocated to colors
-    let allocatedAmount = 0
-    
-    // Allocated items
-    for (const item of items) {
-      const allocatedQty = Object.values(item.colorAllocations || {}).reduce((a, b) => a + b, 0)
-      allocatedAmount += allocatedQty * item.unitPrice
-    }
-    
-    // Allocated charges (if split evenly or assigned to a color)
-    if (totalCharges > 0 && (splitChargesEvenly || selectedChargeColor)) {
-      allocatedAmount += totalCharges
-    }
-    
-    // Allocated tip input (if split evenly or assigned to a color)
-    if (tipAmount > 0 && (splitTipEvenly || selectedTipColor)) {
-      allocatedAmount += tipAmount
-    }
-    
-    // Allocated manual tips (always allocated)
-    allocatedAmount += manualTipTotal
-    
-    // STEP 3: REMAINING = TOTAL - ALLOCATED
-    const remaining = totalEverything - allocatedAmount
-    
-    // If split evenly is enabled, remaining becomes 0 (everything gets allocated)
-    if (splitEvenly) {
-      return 0
-    }
-    
-    return +remaining.toFixed(2)
-  }, [items, charges, tipAmount, tipAllocations, splitChargesEvenly, selectedChargeColor, splitTipEvenly, selectedTipColor, splitEvenly])
-  
-  console.log('TipTable rendered with tipAmount:', tipAmount, 'remainingAmount:', remainingAmount)
+  console.log('TipTable rendered with tipAmount:', tipAmount)
+
+  // Guard if a stale bundle passes a non-array items prop
+  if (typeof items !== 'undefined' && !Array.isArray(items)) {
+    console.error('TipTable received invalid items:', items)
+    return null
+  }
   const td: React.CSSProperties = { 
     padding: 8, 
     border: '1px solid #000', 
@@ -89,12 +36,11 @@ export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setS
 
   const handleAllocate = () => {
     if (splitTipEvenly) return
-    if (selectedTipColor) return
     if (activeColor) setSelectedTipColor(activeColor)
   }
 
   const bigInputStyle: React.CSSProperties = {
-    width: '100px',
+    width: '240px',
     padding: '12px 16px',
     border: '3px solid #000',
     borderStyle: 'inset',
@@ -162,7 +108,7 @@ export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setS
             <td style={{ ...td, textAlign: 'center', verticalAlign: 'middle', background: '#000', border: 'none' }}>
               <button
                 onClick={handleAllocate}
-                disabled={splitTipEvenly || (!!selectedTipColor) || !(tipAmount > 0)}
+                disabled={splitTipEvenly || !(tipAmount > 0) || !activeColor}
                 style={{ 
                   width: 40, 
                   height: 40, 
@@ -170,14 +116,20 @@ export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setS
                   borderRadius: '50%', 
                   border: '3px solid #000', 
                   borderStyle: 'outset',
-                  background: '#888', 
+                  background: selectedTipColor ? selectedTipColor : '#888', 
                   color: '#fff', 
-                  cursor: splitTipEvenly || (!!selectedTipColor) ? 'not-allowed' : 'pointer',
+                  cursor: splitTipEvenly || !activeColor ? 'not-allowed' : 'pointer',
                   display: 'block',
                   margin: '0 auto',
                   boxShadow: '0 4px 8px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.3)'
                 }}
-                title={splitTipEvenly ? 'Disable even split to allocate to a color' : selectedTipColor ? `Allocated to ${selectedTipColor}` : activeColor ? `Allocate to active color ${activeColor}` : 'Select a color to allocate'}
+                title={splitTipEvenly 
+                  ? 'Disable even split to allocate to a color' 
+                  : selectedTipColor 
+                    ? `Tip allocated to ${selectedTipColor}` 
+                    : activeColor 
+                      ? `Allocate tip to ${activeColor}` 
+                      : 'Select a color to allocate'}
               >
 
               </button>
@@ -191,7 +143,7 @@ export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setS
         currentValue={tipAmount}
         onClose={() => setIsCalculatorOpen(false)}
         onConfirm={(value) => setTipAmount(value)}
-        remainingAmount={remainingAmount}
+        remainingAmount={percentBase}
       />
     </section>
   )

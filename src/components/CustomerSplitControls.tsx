@@ -36,7 +36,7 @@ export default function CustomerSplitControls({ numPersons, setNumPersons, split
             cursor: 'pointer'
           }}
         />
-        <span>Split bill evenly</span>
+        <span>Split total food & beverages evenly</span>
       </label>
     </div>
   )

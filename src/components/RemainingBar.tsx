@@ -47,3 +47,5 @@ export default function RemainingBar({ subtotal, tipInput, setTipInput, total }:
   )
 }
 
+
+
