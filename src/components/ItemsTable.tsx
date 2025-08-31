@@ -13,7 +13,7 @@ type Props = {
   disabled?: boolean
 }
 
-function ItemsTable({ items, onAllocate, onChangePrice, onChangeQuantity, onAddItem, onRemoveItem, disabled = false }: Props) {
+function ItemsTable({ items, onAllocate, onChangePrice, onChangeQuantity, onAddItem, disabled = false }: Props) {
   const [isCalcOpen, setIsCalcOpen] = useState(false)
   const [calcValue, setCalcValue] = useState(0)
   const [calcTarget, setCalcTarget] = useState<{ type: 'price' | 'qty'; index: number } | null>(null)

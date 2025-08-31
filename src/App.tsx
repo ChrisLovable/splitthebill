@@ -11,8 +11,7 @@ import AmountRemaining from './components/AmountRemaining'
 
 import { useBillState } from './hooks/useBillState'
 
-// Try the path you suggested
-const atOfficeImage = "/imageatoffice.jpg"
+
 
 function App() {
   const state = useBillState()

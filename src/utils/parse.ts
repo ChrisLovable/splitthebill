@@ -10,12 +10,7 @@ const STOPWORDS = [
 
 const ADDRESS_WORDS = ['road', 'rd', 'street', 'st', 'bengaluru', 'bangalore', 'india', 'pin']
 
-function isStopLine(line: string): boolean {
-  const l = line.toLowerCase()
-  if (STOPWORDS.some(w => l.includes(w))) return true
-  if (ADDRESS_WORDS.some(w => l.includes(w))) return true
-  return false
-}
+
 
 // OCR correction patterns - learned from multiple receipts
 const OCR_CORRECTIONS = [
@@ -65,39 +60,11 @@ function normalizeLine(line: string): string {
   return result.trim()
 }
 
-function parseNumbersAtEnd(line: string): number[] {
-  const nums: number[] = []
-  let rest = line
-  for (let i = 0; i < 3; i++) {
-    const m = rest.match(/([\d]+[\d,]*\.?\d*)\s*$/)
-    if (!m) break
-    const n = parseFloat(m[1].replace(/,/g, ''))
-    if (!Number.isNaN(n)) nums.unshift(n)
-    rest = rest.slice(0, m.index).trim()
-  }
-  return nums
-}
 
-function buildItem(desc: string, qty: number | null, rateOrTotal: number | null, maybeTotal?: number | null): BillItem | null {
-  let quantity = qty ?? 1
-  let unitPrice: number | null = null
-  if (maybeTotal != null && qty != null && qty > 0) {
-    unitPrice = +(maybeTotal / quantity).toFixed(2)
-  } else if (qty != null && rateOrTotal != null) {
-    unitPrice = rateOrTotal
-  } else if (rateOrTotal != null) {
-    unitPrice = rateOrTotal
-  }
-  if (!desc || unitPrice == null || !Number.isFinite(unitPrice) || unitPrice <= 0) return null
-  return { description: desc.trim(), quantity, unitPrice, colorAllocations: {} }
-}
 
-function looksLikeHeader(line: string): boolean {
-  const l = line.toLowerCase()
-  if (/\bitem\b/.test(l) && /\bqty\b/.test(l) && (/\bprice\b|\brate\b/.test(l)) && /\b(value|amount)\b/.test(l)) return true
-  if ((/\b(sn|sno|snc)\b/.test(l)) && (/desc|description/.test(l))) return true
-  return false
-}
+
+
+
 
 export function parseItemsFromText(text: string): BillItem[] {
   const items: BillItem[] = []

@@ -133,14 +133,13 @@ CRITICAL ACCURACY RULES:
       const difference = netTotal - calculatedTotal
       console.log('Difference to resolve:', difference)
       
-      // Look for items that might have wrong unit prices
-      const correctedItems = items.map(item => {
+      // Look for items that might have wrong prices
+      items.forEach(item => {
         const itemValue = item.quantity * item.unitPrice
         // If this item's value is close to the difference, it might be the culprit
         if (Math.abs(itemValue - Math.abs(difference)) < 5) {
           console.log(`Potential price issue with ${item.description}: current value ${itemValue}, difference ${difference}`)
         }
-        return item
       })
       
       // Try to automatically fix common parsing errors
@@ -621,13 +620,13 @@ export function useBillState() {
     if (Math.abs(difference) > 0.01) {
       console.log('⚠️ Mismatch detected! Attempting to fix...')
       
-      // Try to find the item with the wrong price
-      items.forEach((item, index) => {
-        const itemValue = item.quantity * item.unitPrice
-        if (Math.abs(itemValue - Math.abs(difference)) < 10) {
-          console.log(`🔍 Potential issue with ${item.description}: value ${itemValue}, difference ${difference}`)
-        }
-      })
+              // Try to find the item with the wrong price
+        items.forEach(item => {
+          const itemValue = item.quantity * item.unitPrice
+          if (Math.abs(itemValue - Math.abs(difference)) < 10) {
+            console.log(`🔍 Potential issue with ${item.description}: value ${itemValue}, difference ${difference}`)
+          }
+        })
     } else {
       console.log('✅ Receipt data is balanced!')
     }

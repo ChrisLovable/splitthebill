@@ -14,7 +14,7 @@ type Props = {
   onChangeChargesTotal?: (total: number) => void
 }
 
-export default function ChargesTable({ charges, splitChargesEvenly, setSplitChargesEvenly, colors, selectedChargeColor, setSelectedChargeColor, activeColor, onChangeChargesTotal }: Props) {
+export default function ChargesTable({ charges, splitChargesEvenly, setSplitChargesEvenly, selectedChargeColor, setSelectedChargeColor, activeColor, onChangeChargesTotal }: Props) {
   // Only treat service charges as allocatable/displayed here
   const isService = (label: string) => /service\s*(charge|chg)|\bserc\b/i.test(label)
   const serviceChargeTotal = charges.filter(c => isService(c.label)).reduce((sum, charge) => sum + charge.amount, 0)
@@ -27,7 +27,7 @@ export default function ChargesTable({ charges, splitChargesEvenly, setSplitChar
     fontSize: 16,
     fontWeight: 'bold'
   }
-  const labelColor = '#111'
+
 
   const handleAllocate = () => {
     if (splitChargesEvenly) return
