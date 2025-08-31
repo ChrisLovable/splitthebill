@@ -1,4 +1,4 @@
-Force deployment - header image fix
+Force deployment - Hybrid OCR system with Tesseract + OpenAI fallback, improved receipt parsing, Spur logo, and UI enhancements
 
 
 
