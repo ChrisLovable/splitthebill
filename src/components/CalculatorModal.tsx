@@ -196,7 +196,7 @@ export default function CalculatorModal({ isOpen, currentValue, onClose, onConfi
           padding: compact ? '10px' : '16px',
           fontSize: compact ? '26px' : '32px',
           fontWeight: 'bold',
-          fontFamily: "'DS-Digital','Digital-7 Mono','Segment7Standard','Orbitron','VT323','Share Tech Mono','Courier New',monospace",
+          fontFamily: "'Digital-7', 'DS-Digital','Digital-7 Mono','Segment7Standard','Orbitron','VT323','Share Tech Mono','Courier New',monospace",
           fontVariantNumeric: 'tabular-nums',
           letterSpacing: '1px',
           textAlign: 'right',
