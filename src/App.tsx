@@ -11,7 +11,7 @@ import AmountRemaining from './components/AmountRemaining'
 
 import { useBillState } from './hooks/useBillState'
 
-const headerImage = "/spur.jpg"
+const headerImage = "/atoffice.jpg"
 
 // Animation styles for the header image
 const imageAnimationStyles = `
@@ -103,7 +103,7 @@ function App() {
 
           <img 
             src={headerImage} 
-            alt="Spur" 
+            alt="At Office" 
             style={{ 
               display: 'block',
               width: '100%',
