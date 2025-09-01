@@ -371,7 +371,7 @@ export function useBillState() {
       setOcrProgress(10)
       const vi = await callVeryfi(image)
       if (!vi) { setEnginePrompt({ engine, itemsSum: 0, billTotal: 0, nextEngine: enginesOrder[engineIndexRef.current + 1] || null }); return }
-      const { ok, itemsSum } = evaluateParse(vi.items, vi.netTotal)
+      const { ok } = evaluateParse(vi.items, vi.netTotal)
       // Always show Veryfi results, even if parsing validation fails
       setItems(vi.items); 
       setCharges(vi.charges); 
