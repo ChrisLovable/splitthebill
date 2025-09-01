@@ -11,8 +11,8 @@ export default defineConfig({
         changeOrigin: true,
         secure: true,
         rewrite: (path) => path.replace(/^\/veryfi/, ''),
-        configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq) => {
+        configure: (proxy: any) => {
+          proxy.on('proxyReq', (proxyReq: any) => {
             proxyReq.setHeader('Client-Id', 'vrfNVLAahBk1YnNna8BtubLRTUBjzVJJVhTTvIL')
             proxyReq.setHeader('Authorization', 'apikey chrisdevries.personal:b21db4e417060b1ff31d3d2c369d8ad6')
           })

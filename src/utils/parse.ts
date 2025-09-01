@@ -74,7 +74,7 @@ function extractNumberTokens(line: string): Array<{ value: number; start: number
 }
 
 // Infer a sensible quantity from OCR context
-function inferQuantity(rawQuantity: number, numbersInLine: number[], unitPrice: number): number {
+function inferQuantity(rawQuantity: number, numbersInLine: number[]): number {
   const lastNumber = numbersInLine[numbersInLine.length - 1]
   const secondLastNumber = numbersInLine.length >= 2 ? numbersInLine[numbersInLine.length - 2] : NaN
   const tolerance = 0.011
@@ -210,7 +210,7 @@ function parseItemLine(line: string): BillItem | null {
       const [, description, qtyStr, priceStr] = match
       const parsedQty = parseInt(qtyStr, 10)
       const unitPrice = parseFloat(priceStr.replace(/,/g, ''))
-      const quantity = inferQuantity(parsedQty, numbersInLine, unitPrice)
+      const quantity = inferQuantity(parsedQty, numbersInLine)
       if (description && quantity > 0 && unitPrice > 0 && !isNaN(unitPrice)) {
         return {
           description: cleanItemDescription(description),

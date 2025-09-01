@@ -40,10 +40,7 @@ export function useBillState() {
   const [enginePrompt, setEnginePrompt] = useState<null | { engine: EngineName; itemsSum: number; billTotal: number | null; nextEngine: EngineName | null }>(null)
   const engineIndexRef = useRef<number>(0)
 
-  // OCR mode and API settings from env
-  const ocrMode = (((import.meta as any).env?.VITE_OCR_MODE as string | undefined) || 'auto').toLowerCase()
-  const ocrOnly = (((import.meta as any).env?.VITE_OCR_ONLY as string | undefined) || '').toLowerCase()
-  const ocrFirst = (((import.meta as any).env?.VITE_OCR_FIRST as string | undefined) || '').toLowerCase() as EngineName | ''
+  // OCR mode and API settings from env (unused but kept for potential future use)
   // Veryfi (hardcoded for testing per request)
   const veryfiClientId = 'vrfNVLAahBk1YnNna8BtubLRTUBjzVJJVhTTvIL'
   const veryfiUsername = 'chrisdevries.personal'

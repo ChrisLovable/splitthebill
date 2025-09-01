@@ -153,7 +153,7 @@ function App() {
                 return sum + it.unitPrice * originalQty
               }, 0)
               const tolerance = 5 // Allow R5 difference for rounding
-              const matches = Math.abs(state.netTotal - itemsTotal) <= tolerance
+                              const matches = Math.abs((state.netTotal || 0) - itemsTotal) <= tolerance
               return matches 
                 ? 'linear-gradient(145deg, #059669, #047857)' 
                 : 'linear-gradient(145deg, #dc2626, #b91c1c)'
@@ -172,7 +172,7 @@ function App() {
             justifyContent: 'center'
           }}>
             <div style={{ fontSize: 28, marginBottom: 20, textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-              BILL TOTAL = R{state.netTotal.toFixed(2)}
+              BILL TOTAL = R{(state.netTotal || 0).toFixed(2)}
             </div>
             <div style={{ fontSize: 16, fontWeight: 'normal', marginBottom: 24, whiteSpace: 'pre-line', lineHeight: 1.4 }}>
               {(() => {
@@ -182,10 +182,10 @@ function App() {
                   return sum + it.unitPrice * originalQty
                 }, 0)
                 const tolerance = 5
-                const matches = Math.abs(state.netTotal - itemsTotal) <= tolerance
+                const matches = Math.abs((state.netTotal || 0) - itemsTotal) <= tolerance
                 return matches 
                   ? `✅ PARSING CONFIRMED!\nBill total matches items total.\nSafe to proceed with allocation.` 
-                  : `⚠️ MISMATCH DETECTED!\nItems total: R${itemsTotal.toFixed(2)}\nBill total: R${state.netTotal.toFixed(2)}\nPlease check the parsing before proceeding.`
+                  : `⚠️ MISMATCH DETECTED!\nItems total: R${itemsTotal.toFixed(2)}\nBill total: R${(state.netTotal || 0).toFixed(2)}\nPlease check the parsing before proceeding.`
               })()}
             </div>
             <button
@@ -214,7 +214,6 @@ function App() {
         charges={state.charges}
         splitChargesEvenly={state.splitChargesEvenly}
         setSplitChargesEvenly={state.setSplitChargesEvenly}
-        colors={visibleColors}
         selectedChargeColor={state.selectedChargeColor}
         setSelectedChargeColor={state.setSelectedChargeColor}
         activeColor={state.activeColor}

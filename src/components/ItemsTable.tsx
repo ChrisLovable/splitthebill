@@ -172,7 +172,7 @@ function ItemsTable({ items, onAllocate, onChangePrice, onChangeQuantity, onAddR
                   </td>
                   <td
                     style={{ ...tdBase, wordBreak: 'break-word' }}
-                    onClick={(e) => {
+                    onClick={() => {
                       const el = document.getElementById(`desc-input-${idx}`) as HTMLInputElement | null
                       el?.focus()
                     }}
