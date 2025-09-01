@@ -1,4 +1,6 @@
 import type { BillCharge } from '../types'
+import { useState } from 'react'
+import CalculatorModal from './CalculatorModal'
 
 type Props = {
   charges: BillCharge[]
@@ -8,12 +10,15 @@ type Props = {
   selectedChargeColor: string | null
   setSelectedChargeColor: (c: string | null) => void
   activeColor: string | null
+  // handler to change the overall charges total via calculator
+  onChangeChargesTotal?: (total: number) => void
 }
 
-export default function ChargesTable({ charges, splitChargesEvenly, setSplitChargesEvenly, colors, selectedChargeColor, setSelectedChargeColor, activeColor }: Props) {
-  // Don't show table if no charges or all charges are 0
-  const totalCharges = charges.reduce((sum, charge) => sum + charge.amount, 0)
-  if (totalCharges === 0) return null
+export default function ChargesTable({ charges, splitChargesEvenly, setSplitChargesEvenly, colors, selectedChargeColor, setSelectedChargeColor, activeColor, onChangeChargesTotal }: Props) {
+  // Only treat service charges as allocatable/displayed here
+  const isService = (label: string) => /service\s*(charge|chg)|\bserc\b/i.test(label)
+  const serviceChargeTotal = charges.filter(c => isService(c.label)).reduce((sum, charge) => sum + charge.amount, 0)
+  if (serviceChargeTotal === 0) return null
 
   const td: React.CSSProperties = { 
     padding: 8, 
@@ -30,6 +35,7 @@ export default function ChargesTable({ charges, splitChargesEvenly, setSplitChar
     if (activeColor) setSelectedChargeColor(activeColor)
   }
 
+  const [isCalcOpen, setIsCalcOpen] = useState(false)
   return (
     <section style={{ padding: '12px 16px' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 8, gap: 12, flexWrap: 'wrap' }}>
@@ -50,17 +56,7 @@ export default function ChargesTable({ charges, splitChargesEvenly, setSplitChar
           />
           <span>Split service charges evenly</span>
         </label>
-        {!splitChargesEvenly && (
-          <label style={{ color: labelColor, fontSize: 17, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span>Allocate service charges to</span>
-            <select value={selectedChargeColor ?? ''} onChange={(e) => setSelectedChargeColor(e.target.value || null)}>
-              <option value="">Select color</option>
-              {colors.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </label>
-        )}
+        {/* Removed color dropdown per request */}
       </div>
 
       <table style={{ 
@@ -76,7 +72,9 @@ export default function ChargesTable({ charges, splitChargesEvenly, setSplitChar
         <tbody>
           <tr style={{ background: '#ffffff' }}>
             <td style={td}>Service charges</td>
-            <td style={td}>R{totalCharges.toFixed(2)}</td>
+            <td style={{ ...td, cursor: onChangeChargesTotal ? 'pointer' : 'default' }} onClick={() => {
+              if (onChangeChargesTotal) setIsCalcOpen(true)
+            }}>R{serviceChargeTotal.toFixed(2)}</td>
             <td style={{ ...td, textAlign: 'center', verticalAlign: 'middle', background: '#000', border: 'none' }}>
               <button
                 onClick={handleAllocate}
@@ -103,6 +101,18 @@ export default function ChargesTable({ charges, splitChargesEvenly, setSplitChar
           </tr>
         </tbody>
       </table>
+
+      {onChangeChargesTotal && (
+        <CalculatorModal
+          isOpen={isCalcOpen}
+          currentValue={serviceChargeTotal}
+          onClose={() => setIsCalcOpen(false)}
+          onConfirm={(val) => onChangeChargesTotal(val)}
+          showOperations={false}
+          confirmLabel="Change"
+          compact
+        />
+      )}
     </section>
   )
 }

@@ -21,3 +21,5 @@ export default function BottomSummary({ subtotal, tipTotal, grandTotal }: Props)
   )
 }
 
+
+

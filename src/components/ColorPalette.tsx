@@ -33,7 +33,9 @@ export default function ColorPalette({ colors, activeColor, totals, onSelect }: 
               maxWidth: '100%'
             }}
           >
-            {colors.slice(rowIndex * 5, (rowIndex + 1) * 5).map((c) => {
+            {colors.slice(rowIndex * 5, (rowIndex + 1) * 5).map((c, idxInRow) => {
+              const idx = rowIndex * 5 + idxInRow
+              const numberLabel = (idx + 1).toString()
               const isActive = activeColor === c
               return (
                 <button
@@ -52,9 +54,22 @@ export default function ColorPalette({ colors, activeColor, totals, onSelect }: 
                       : 'inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -4px 8px rgba(0,0,0,0.55)',
                     transform: isActive ? 'scale(1.05)' : 'scale(1)',
                     flex: '0 0 auto',
-                    margin: 0
+                    margin: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                 >
+                  {/* Number label */}
+                  <span style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    color: '#000',
+                    fontWeight: 400,
+                    fontSize: 16,
+                    textShadow: '0 1px 0 rgba(255,255,255,0.6)'
+                  }}>{numberLabel}</span>
+
                   {isActive && (
                     <span style={{
                       position: 'absolute',
@@ -72,9 +87,30 @@ export default function ColorPalette({ colors, activeColor, totals, onSelect }: 
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 12 }}>
-        {colors.map(c => (
-          <Card key={`tile-${c}`} style={{ background: c, color: getTextColor(c), textAlign: 'center', height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 8px' }}>
-            <span style={{ fontWeight: 800 }}>R{(totals[c] || 0).toFixed(2)}</span>
+        {colors.map((c, i) => (
+          <Card key={`tile-${c}`} style={{ background: c, color: '#ffffff', height: 30, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 10px', paddingLeft: 28, position: 'relative' }}>
+            <span style={{ fontWeight: 800, color: '#ffffff', textAlign: 'right', width: '100%' }}>R{(totals[c] || 0).toFixed(2)}</span>
+            {/* Number label near the left inside the pill with round black border */}
+            <span
+              style={{
+                position: 'absolute',
+                left: 8,
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                border: '2px solid #000',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                lineHeight: 1,
+                color: '#000',
+                fontWeight: 400,
+                fontSize: 14,
+                background: 'transparent'
+              }}
+            >
+              {(i + 1).toString()}
+            </span>
           </Card>
         ))}
       </div>

@@ -6,9 +6,12 @@ type Props = {
   onClose: () => void
   onConfirm: (value: number) => void
   remainingAmount?: number
+  showOperations?: boolean
+  confirmLabel?: string
+  compact?: boolean
 }
 
-export default function CalculatorModal({ isOpen, currentValue, onClose, onConfirm, remainingAmount = 0 }: Props) {
+export default function CalculatorModal({ isOpen, currentValue, onClose, onConfirm, remainingAmount = 0, showOperations = true, confirmLabel = 'Add tip', compact = false }: Props) {
   const [display, setDisplay] = useState(currentValue > 0 ? currentValue.toFixed(2) : '0')
   const [hasDecimal, setHasDecimal] = useState(currentValue > 0 ? true : false)
   const [previousValue, setPreviousValue] = useState<number | null>(null)
@@ -114,13 +117,13 @@ export default function CalculatorModal({ isOpen, currentValue, onClose, onConfi
   }
 
   const buttonStyle: React.CSSProperties = {
-    width: '45px',
-    height: '45px',
+    width: compact ? '40px' : '45px',
+    height: compact ? '40px' : '45px',
     border: '2px solid #000',
     borderStyle: 'outset',
     background: 'linear-gradient(145deg, #B8E0F0, #8FC8E8)',
     color: '#000',
-    fontSize: '18px',
+    fontSize: compact ? '16px' : '18px',
     fontWeight: 'bold',
     borderRadius: '8px',
     cursor: 'pointer',
@@ -134,7 +137,8 @@ export default function CalculatorModal({ isOpen, currentValue, onClose, onConfi
     background: 'linear-gradient(145deg, #0080FF, #0066DD)',
     color: '#fff',
     textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-    fontSize: '14px'
+    fontSize: '14px',
+    width: compact ? '80px' : buttonStyle.width
   }
 
   const cancelButtonStyle: React.CSSProperties = {
@@ -178,23 +182,26 @@ export default function CalculatorModal({ isOpen, currentValue, onClose, onConfi
       <div style={{
         background: 'linear-gradient(145deg, #888888, #666666)',
         borderRadius: '16px',
-        padding: '16px',
+        padding: compact ? '12px' : '16px',
         border: '3px solid #000',
         borderStyle: 'outset',
         boxShadow: '0 8px 16px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,255,255,0.3), inset 0 -2px 6px rgba(0,0,0,0.1)',
-        minWidth: '280px',
-        maxWidth: '300px'
+        width: compact ? '240px' : '300px',
+        boxSizing: 'border-box'
       }}>
         {/* Display */}
         <div style={{
           background: 'linear-gradient(145deg, #000000, #1a1a1a)',
           color: '#00FF00',
-          padding: '16px',
-          fontSize: '32px',
+          padding: compact ? '10px' : '16px',
+          fontSize: compact ? '26px' : '32px',
           fontWeight: 'bold',
+          fontFamily: "'DS-Digital','Digital-7 Mono','Segment7Standard','Orbitron','VT323','Share Tech Mono','Courier New',monospace",
+          fontVariantNumeric: 'tabular-nums',
+          letterSpacing: '1px',
           textAlign: 'right',
           borderRadius: '12px',
-          marginBottom: '20px',
+          marginBottom: compact ? '12px' : '20px',
           border: '3px solid #333',
           borderStyle: 'inset',
           boxShadow: 'inset 0 4px 8px rgba(0,0,0,0.8), inset 0 -2px 4px rgba(255,255,255,0.1)',
@@ -203,63 +210,91 @@ export default function CalculatorModal({ isOpen, currentValue, onClose, onConfi
 {display}
         </div>
 
-        {/* Row 1: Operations - Centered */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', maxWidth: '280px', width: '100%' }}>
-            <button style={operationButtonStyle} onClick={() => handleOperation('+')}>+</button>
-            <button style={operationButtonStyle} onClick={() => handleOperation('-')}>-</button>
-            <button style={operationButtonStyle} onClick={() => handleOperation('×')}>×</button>
-            <button style={operationButtonStyle} onClick={() => handleOperation('÷')}>÷</button>
-            <button style={equalsButtonStyle} onClick={handleEquals}>=</button>
+        {showOperations && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', maxWidth: '280px', width: '100%' }}>
+              <button style={operationButtonStyle} onClick={() => handleOperation('+')}>+</button>
+              <button style={operationButtonStyle} onClick={() => handleOperation('-')}>-</button>
+              <button style={operationButtonStyle} onClick={() => handleOperation('×')}>×</button>
+              <button style={operationButtonStyle} onClick={() => handleOperation('÷')}>÷</button>
+              <button style={equalsButtonStyle} onClick={handleEquals}>=</button>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Percentage Buttons */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', maxWidth: '240px', width: '100%' }}>
-            <button style={{...operationButtonStyle, fontSize: '10px', background: 'linear-gradient(145deg, #00AA44, #008833)'}} onClick={() => handlePercentage(5)}>5%</button>
-            <button style={{...operationButtonStyle, fontSize: '10px', background: 'linear-gradient(145deg, #00AA44, #008833)'}} onClick={() => handlePercentage(10)}>10%</button>
-            <button style={{...operationButtonStyle, fontSize: '10px', background: 'linear-gradient(145deg, #00AA44, #008833)'}} onClick={() => handlePercentage(15)}>15%</button>
-            <button style={{...operationButtonStyle, fontSize: '10px', background: 'linear-gradient(145deg, #00AA44, #008833)'}} onClick={() => handlePercentage(20)}>20%</button>
+        {showOperations && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', maxWidth: '240px', width: '100%' }}>
+              <button style={{...operationButtonStyle, fontSize: '10px', background: 'linear-gradient(145deg, #00AA44, #008833)'}} onClick={() => handlePercentage(5)}>5%</button>
+              <button style={{...operationButtonStyle, fontSize: '10px', background: 'linear-gradient(145deg, #00AA44, #008833)'}} onClick={() => handlePercentage(10)}>10%</button>
+              <button style={{...operationButtonStyle, fontSize: '10px', background: 'linear-gradient(145deg, #00AA44, #008833)'}} onClick={() => handlePercentage(15)}>15%</button>
+              <button style={{...operationButtonStyle, fontSize: '10px', background: 'linear-gradient(145deg, #00AA44, #008833)'}} onClick={() => handlePercentage(20)}>20%</button>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Number Button Grid - Centered */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', maxWidth: '150px' }}>
-            {/* Row 2: 7-9 */}
-            <button style={buttonStyle} onClick={() => handleNumber('7')}>7</button>
-            <button style={buttonStyle} onClick={() => handleNumber('8')}>8</button>
-            <button style={buttonStyle} onClick={() => handleNumber('9')}>9</button>
-            
-            {/* Row 3: 4-6 */}
-            <button style={buttonStyle} onClick={() => handleNumber('4')}>4</button>
-            <button style={buttonStyle} onClick={() => handleNumber('5')}>5</button>
-            <button style={buttonStyle} onClick={() => handleNumber('6')}>6</button>
-            
-            {/* Row 4: 1-3 */}
-            <button style={buttonStyle} onClick={() => handleNumber('1')}>1</button>
-            <button style={buttonStyle} onClick={() => handleNumber('2')}>2</button>
-            <button style={buttonStyle} onClick={() => handleNumber('3')}>3</button>
-          </div>
-        </div>
-
-        {/* Row 5: 0 and decimal - Centered */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '6px', maxWidth: '150px' }}>
-            <button style={buttonStyle} onClick={() => handleNumber('0')}>0</button>
-            <button style={buttonStyle} onClick={handleDecimal}>.</button>
-          </div>
-        </div>
+        {showOperations ? (
+          <>
+            {/* Standard 3x4 keypad */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', width: '100%' }}>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('7')}>7</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('8')}>8</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('9')}>9</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('4')}>4</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('5')}>5</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('6')}>6</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('1')}>1</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('2')}>2</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('3')}>3</button>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '6px', width: '100%' }}>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('0')}>0</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={handleDecimal}>.</button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Compact keypad: 5 numbers per row, dot centered below */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', width: '100%' }}>
+                {/* Row 1 */}
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('1')}>1</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('2')}>2</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('3')}>3</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('4')}>4</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('5')}>5</button>
+                {/* Row 2 */}
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('6')}>6</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('7')}>7</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('8')}>8</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('9')}>9</button>
+                <button style={{...buttonStyle, width: '100%'}} onClick={() => handleNumber('0')}>0</button>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', width: '100%' }}>
+                <div></div>
+                <div></div>
+                <button style={{...buttonStyle, width: '100%'}} onClick={handleDecimal}>.</button>
+                <div></div>
+                <div></div>
+              </div>
+            </div>
+          </>
+        )}
 
 
 
         {/* Action Buttons - Aligned with Numbers */}
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', maxWidth: '150px', width: '100%' }}>
-            <button style={{...cancelButtonStyle, fontSize: '12px'}} onClick={onClose}>Back</button>
-            <button style={{...actionButtonStyle, fontSize: '12px'}} onClick={handleClear}>Clear</button>
-            <button style={{...actionButtonStyle, fontSize: '12px'}} onClick={handleConfirm}>Add tip</button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', width: '100%' }}>
+            <button style={{...cancelButtonStyle, fontSize: '12px', width: '100%' }} onClick={onClose}>Back</button>
+            <button style={{...actionButtonStyle, fontSize: '12px', width: '100%' }} onClick={handleClear}>Clear</button>
+            <button style={{...actionButtonStyle, fontSize: '12px', width: '100%' }} onClick={handleConfirm}>{confirmLabel}</button>
           </div>
         </div>
       </div>
