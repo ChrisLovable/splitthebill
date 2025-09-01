@@ -91,18 +91,21 @@ export default function ReceiptPreview({ image, onRunOCR, ocrProgress }: Props) 
       <div className="flex justify-center">
         <button
           onClick={() => onRunOCR(true)}
+          className="relative"
           style={{
             padding: '8px 12px',
             borderRadius: 8,
             border: '2px solid #000',
             borderStyle: 'outset',
-            background: 'linear-gradient(145deg, #10b981, #059669)',
-            color: '#fff',
-            fontWeight: 700,
-            boxShadow: '0 4px 8px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)'
+            background: '#00FF00',
+            color: '#000',
+            fontWeight: 'bold',
+            fontSize: '14px',
+            boxShadow: '0 4px 8px rgba(0, 255, 0, 0.4), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)'
           }}
         >
-          Rerun OCR
+          <span className="shine" aria-hidden />
+          Rerun Optical Character Recognition & Parse Data
         </button>
       </div>
       {ocrProgress > 0 && ocrProgress < 100 && (

@@ -21,8 +21,13 @@ export function useBillState() {
   const [userColors, setUserColors] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem('userColors') || 'null') || DEFAULT_COLORS } catch { return DEFAULT_COLORS }
   })
-  const [activeColor, setActiveColor] = useState<string | null>(() => localStorage.getItem('activeColor') || DEFAULT_COLORS[0])
+  const [activeColor, setActiveColor] = useState<string | null>(() => {
+    const saved = localStorage.getItem('activeColor') || DEFAULT_COLORS[0]
+    console.log('[Init] Setting initial activeColor to:', saved)
+    return saved
+  })
   const [isCapturing, setIsCapturing] = useState<boolean>(false)
+  const [isScanning, setIsScanning] = useState<boolean>(false)
   const [ocrProgress, setOcrProgress] = useState<number>(0)
   const [charges, setCharges] = useState<BillCharge[]>([])
   const [netTotal, setNetTotal] = useState<number | null>(null)
@@ -299,6 +304,56 @@ export function useBillState() {
     } catch (error) { console.error('Error capturing photo:', error); alert('Failed to capture photo. Please try again.') }
   }
 
+  const startScanning = async () => {
+    await startCamera()
+    setIsScanning(true)
+    startContinuousScanning()
+  }
+
+  const stopScanning = () => {
+    setIsScanning(false)
+    cancelCamera()
+  }
+
+  const startContinuousScanning = () => {
+    if (!isScanning) return
+    
+    const scanFrame = () => {
+      if (!isScanning || !videoRef.current) return
+      
+      const video = videoRef.current
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        setTimeout(scanFrame, 1000) // Retry in 1 second
+        return
+      }
+
+      try {
+        if (!canvasRef.current) canvasRef.current = document.createElement('canvas')
+        const canvas = canvasRef.current
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
+        setBillImage(dataUrl)
+        
+        // Trigger OCR on the frame
+        runOCR(true)
+        
+        // Continue scanning every 3 seconds
+        setTimeout(scanFrame, 3000)
+      } catch (error) {
+        console.error('Scanning error:', error)
+        setTimeout(scanFrame, 2000) // Retry in 2 seconds
+      }
+    }
+
+    // Start scanning after a brief delay
+    setTimeout(scanFrame, 1000)
+  }
+
   // Exposed actions for the engine prompt
   const proceedToNextEngine = async () => {
     const nextIdx = engineIndexRef.current + 1
@@ -364,27 +419,36 @@ export function useBillState() {
   const addColor = () => { const randomHex = `#${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0')}`; setUserColors(prev => [...prev, randomHex]); setActiveColor(randomHex) }
 
   const allocateOne = (index: number) => {
-    if (activeColor == null) return
+    console.log(`[allocateOne] Called for index ${index}, activeColor: ${activeColor}`)
+    if (activeColor == null) {
+      console.log('[allocateOne] No active color selected')
+      return
+    }
     hasUserEditsRef.current = true
     setItems(prev => {
+      console.log(`[allocateOne] Current item:`, prev[index])
       const newItems = [...prev]; const item = { ...newItems[index] }
-      if (item.quantity <= 0) return prev
+      if (item.quantity <= 0) {
+        console.log('[allocateOne] No quantity available to allocate')
+        return prev
+      }
       if (!item.colorAllocations) item.colorAllocations = {}
       item.quantity = item.quantity - 1
       item.colorAllocations = { ...item.colorAllocations, [activeColor]: (item.colorAllocations[activeColor] || 0) + 1 }
       newItems[index] = item
+      console.log(`[allocateOne] SUCCESS: Allocated to ${activeColor}, new item:`, item)
       return newItems
     })
   }
 
   // Allocate one unit from any available item to the specified color
   const allocateToColor = (color: string) => {
+    console.log(`[allocateToColor] Called with color: ${color}`)
     hasUserEditsRef.current = true
     
-    // First set this as the active color
-    setActiveColor(color)
-    
     setItems(prev => {
+      console.log(`[allocateToColor] Current items:`, prev.map(it => `${it.description}: qty=${it.quantity}`))
+      
       // Find any item with available quantity
       for (let i = 0; i < prev.length; i++) {
         if (prev[i].quantity > 0) {
@@ -394,11 +458,11 @@ export function useBillState() {
           item.quantity = item.quantity - 1
           item.colorAllocations = { ...item.colorAllocations, [color]: (item.colorAllocations[color] || 0) + 1 }
           newItems[i] = item
-          console.log(`[Allocation] Allocated 1 unit of "${item.description}" to color ${color}`)
+          console.log(`[Allocation] SUCCESS: Allocated 1 unit of "${item.description}" to color ${color}`)
           return newItems
         }
       }
-      console.log('[Allocation] No available items to allocate')
+      console.log('[Allocation] ERROR: No available items to allocate')
       return prev // No available items to allocate
     })
   }
@@ -501,7 +565,10 @@ export function useBillState() {
   useEffect(() => { localStorage.setItem('items', JSON.stringify(items)) }, [items])
   useEffect(() => { localStorage.setItem('tipAllocations', JSON.stringify(tipAllocations)) }, [tipAllocations])
   useEffect(() => { localStorage.setItem('userColors', JSON.stringify(userColors)) }, [userColors])
-  useEffect(() => { if (activeColor) localStorage.setItem('activeColor', activeColor) }, [activeColor])
+  useEffect(() => { 
+    console.log('[ActiveColor] Changed to:', activeColor)
+    if (activeColor) localStorage.setItem('activeColor', activeColor) 
+  }, [activeColor])
   useEffect(() => { localStorage.setItem('numPersons', String(numPersons)) }, [numPersons])
   useEffect(() => { localStorage.setItem('splitChargesEvenly', JSON.stringify(splitChargesEvenly)) }, [splitChargesEvenly])
   useEffect(() => { localStorage.setItem('splitTipEvenly', JSON.stringify(splitTipEvenly)) }, [splitTipEvenly])
@@ -520,11 +587,14 @@ export function useBillState() {
     userColors,
     activeColor,
     isCapturing,
+    isScanning,
     ocrProgress,
     setActiveColor,
     startCamera,
     cancelCamera,
     capturePhoto,
+    startScanning,
+    stopScanning,
     runOCR,
     addColor,
     allocateOne,

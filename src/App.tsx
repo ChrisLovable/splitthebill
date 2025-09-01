@@ -13,6 +13,36 @@ import { useBillState } from './hooks/useBillState'
 
 const headerImage = "/spur.jpg"
 
+// Animation styles for the header image
+const imageAnimationStyles = `
+  @keyframes redGlowPulse {
+    0% { 
+      box-shadow: 0 12px 30px rgba(255, 51, 51, 0.6),
+                  0 0 30px rgba(255, 51, 51, 0.4),
+                  0 0 60px rgba(255, 51, 51, 0.2);
+      filter: drop-shadow(0 0 20px rgba(255, 51, 51, 0.6));
+    }
+    50% { 
+      box-shadow: 0 16px 40px rgba(255, 51, 51, 0.9),
+                  0 0 50px rgba(255, 51, 51, 0.7),
+                  0 0 100px rgba(255, 51, 51, 0.4);
+      filter: drop-shadow(0 0 35px rgba(255, 51, 51, 0.9));
+    }
+    100% { 
+      box-shadow: 0 12px 30px rgba(255, 51, 51, 0.6),
+                  0 0 30px rgba(255, 51, 51, 0.4),
+                  0 0 60px rgba(255, 51, 51, 0.2);
+      filter: drop-shadow(0 0 20px rgba(255, 51, 51, 0.6));
+    }
+  }
+  
+  @keyframes borderPulse {
+    0% { border-color: #FF3333; border-width: 8px; }
+    50% { border-color: #FF0000; border-width: 10px; }
+    100% { border-color: #FF3333; border-width: 8px; }
+  }
+`
+
 function App() {
   const state = useBillState()
 
@@ -22,6 +52,8 @@ function App() {
 
   return (
     <PhoneFrame>
+      {/* Inject animation styles */}
+      <style>{imageAnimationStyles}</style>
       {/* Header image */}
       <div style={{ width: '100%', padding: '12px 16px 8px 16px', textAlign: 'center' }}>
         <div 
@@ -32,28 +64,39 @@ function App() {
             overflow: 'hidden', 
             backgroundColor: '#111827',
             margin: '0 auto',
-            border: '6px solid #ef4444',
-            boxShadow: '0 8px 20px rgba(239, 68, 68, 0.35)',
-            position: 'relative'
+            border: '8px solid #FF3333',
+            boxShadow: '0 12px 30px rgba(255, 51, 51, 0.6)',
+            position: 'relative',
+            animation: 'redGlowPulse 4s ease-in-out infinite, borderPulse 3s ease-in-out infinite'
           }}
         >
-          {/* Soft halo blur layer (inner) */}
+          {/* Inner bright red glow */}
           <div style={{
             position: 'absolute',
-            inset: -8,
+            inset: -12,
             borderRadius: '50%',
-            background: 'radial-gradient(closest-side, rgba(255,255,255,0.55), rgba(255,255,255,0) 70%)',
-            filter: 'blur(10px)',
+            background: 'radial-gradient(closest-side, rgba(255,51,51,0.8), rgba(255,51,51,0) 60%)',
+            filter: 'blur(12px)',
             zIndex: 0,
             pointerEvents: 'none'
           }} />
-          {/* Colored glow layer (outer) */}
+          {/* Outer intense red blur */}
           <div style={{
             position: 'absolute',
-            inset: -14,
+            inset: -20,
             borderRadius: '50%',
-            background: 'radial-gradient(closest-side, rgba(239,68,68,0.45), rgba(239,68,68,0) 70%)',
-            filter: 'blur(14px)',
+            background: 'radial-gradient(closest-side, rgba(255,0,0,0.7), rgba(255,0,0,0) 70%)',
+            filter: 'blur(18px)',
+            zIndex: 0,
+            pointerEvents: 'none'
+          }} />
+          {/* Far outer red halo */}
+          <div style={{
+            position: 'absolute',
+            inset: -30,
+            borderRadius: '50%',
+            background: 'radial-gradient(closest-side, rgba(255,51,51,0.4), rgba(255,51,51,0) 80%)',
+            filter: 'blur(25px)',
             zIndex: 0,
             pointerEvents: 'none'
           }} />
@@ -77,11 +120,14 @@ function App() {
       <div className="px-4 pt-2 space-y-2">
         <CameraCapture
           isCapturing={state.isCapturing}
+          isScanning={state.isScanning}
           videoRef={state.videoRef as React.RefObject<HTMLVideoElement>}
           onOpen={state.startCamera}
           onCapture={state.capturePhoto}
           onCancel={state.cancelCamera}
           onFileSelect={state.handleFileSelect}
+          onStartScanning={state.startScanning}
+          onStopScanning={state.stopScanning}
         />
 
       </div>
@@ -252,7 +298,6 @@ function App() {
         totals={state.totalsByColor} 
         onSelect={state.setActiveColor} 
         onAdd={state.addColor}
-        onAllocateToColor={state.allocateToColor}
       />
 
       <div style={{ padding: '8px 16px', display: 'flex', justifyContent: 'center' }}>

@@ -1,6 +1,7 @@
 import type { BillItem } from '../types'
 import { useState } from 'react'
 import CalculatorModal from './CalculatorModal'
+import CustomKeyboard from './CustomKeyboard'
 
 type Props = {
   items: BillItem[]
@@ -19,6 +20,8 @@ function ItemsTable({ items, onAllocate, onChangePrice, onChangeQuantity, onAddR
   const [isCalcOpen, setIsCalcOpen] = useState(false)
   const [calcValue, setCalcValue] = useState(0)
   const [calcTarget, setCalcTarget] = useState<{ type: 'price' | 'qty'; index: number } | null>(null)
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false)
+  const [keyboardTarget, setKeyboardTarget] = useState<number | null>(null)
   // Calculate total Food & Beverages using ORIGINAL quantities (quantity + allocated)
   const itemsTotal = items.reduce((sum, it) => {
     const allocatedQty = Object.values(it.colorAllocations || {}).reduce((a, b) => a + b, 0)
@@ -32,8 +35,8 @@ function ItemsTable({ items, onAllocate, onChangePrice, onChangeQuantity, onAddR
     color: '#000000',
     verticalAlign: 'middle',
     fontSize: 12,
-    fontWeight: 600,
-    fontFamily: '"Courier New", Courier, monospace',
+    fontWeight: 'bold',
+    fontFamily: 'Arial, sans-serif',
     background: 'transparent',
     backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 55%, rgba(0,0,0,0.06) 100%)',
     boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.9), inset 0 -4px 8px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.2)'
@@ -138,21 +141,23 @@ function ItemsTable({ items, onAllocate, onChangePrice, onChangeQuantity, onAddR
                           maxHeight: 18,
                           aspectRatio: '1 / 1',
                           borderRadius: '50%',
-                          border: '2px solid #7f1d1d',
+                          border: '2px solid #000',
                           borderStyle: 'outset',
-                          background: 'linear-gradient(145deg, #f87171, #b91c1c)',
+                          background: 'linear-gradient(145deg, #FF3333, #CC0000)',
                           color: '#fff',
                           padding: 0,
                           boxSizing: 'border-box',
                           cursor: onDeleteRow ? 'pointer' : 'not-allowed',
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.6), inset 0 -1px 2px rgba(0,0,0,0.35)',
+                          boxShadow: '0 4px 8px rgba(255, 51, 51, 0.5), inset 0 2px 4px rgba(255,255,255,0.7), inset 0 -2px 4px rgba(0,0,0,0.4)',
                           display: 'block',
                           alignItems: 'center',
                           justifyContent: 'center',
                           position: 'relative',
                           overflow: 'hidden',
                           appearance: 'none',
-                          WebkitAppearance: 'none'
+                          WebkitAppearance: 'none',
+                          backdropFilter: 'blur(1px)',
+                          transition: 'all 0.15s ease'
                         }}
                       >
                         <span
@@ -164,52 +169,38 @@ function ItemsTable({ items, onAllocate, onChangePrice, onChangeQuantity, onAddR
                             width: '60%',
                             height: 2,
                             borderRadius: 1,
-                            background: '#ffffff'
+                            background: '#ffffff',
+                            boxShadow: '0 0 2px rgba(255,255,255,0.8)'
                           }}
                         />
                       </button>
                     </div>
                   </td>
                   <td
-                    style={{ ...tdBase, wordBreak: 'break-word' }}
+                    style={{ ...tdBase, wordBreak: 'break-word', cursor: 'pointer' }}
                     onClick={() => {
-                      const el = document.getElementById(`desc-input-${idx}`) as HTMLInputElement | null
-                      el?.focus()
+                      setKeyboardTarget(idx)
+                      setIsKeyboardOpen(true)
                     }}
                   >
-                    <textarea
-                      id={`desc-input-${idx}`}
-                      value={it.description}
-                      placeholder="Item description"
-                      rows={1}
-                      onChange={(e) => onChangeDescription && onChangeDescription(idx, e.target.value)}
-                      onInput={(e) => { const t = e.currentTarget as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = `${t.scrollHeight}px` }}
-                      style={{
-                        width: '100%',
-                        border: 'none',
-                        outline: 'none',
-                        padding: 0,
-                        margin: 0,
-                        background: 'transparent',
-                        color: '#000',
-                        fontWeight: 600,
-                        fontFamily: '"Courier New", Courier, monospace',
-                        cursor: 'text',
-                        position: 'relative',
-                        zIndex: 1,
-                        resize: 'none',
-                        overflow: 'hidden',
-                        lineHeight: 1.2,
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-word'
-                      }}
-                    />
+                    <div style={{
+                      width: '100%',
+                      minHeight: '20px',
+                      fontWeight: 'bold',
+                      fontFamily: 'Arial, sans-serif',
+                      color: '#000',
+                      lineHeight: 1.2,
+                      wordBreak: 'break-word',
+                      padding: '2px 0'
+                    }}>
+                      {it.description || <span style={{ color: '#999', fontStyle: 'italic' }}>Tap to edit</span>}
+                    </div>
                   </td>
                   <td
                     style={{ ...tdBase, whiteSpace: 'nowrap', cursor: 'pointer', textAlign: 'center' }}
                     onClick={() => { setCalcTarget({ type: 'price', index: idx }); setCalcValue(it.unitPrice); setIsCalcOpen(true) }}
                   >
-                    <span style={{ fontWeight: 600, fontFamily: '"Courier New", Courier, monospace' }}>
+                    <span style={{ fontWeight: 'bold', fontFamily: 'Arial, sans-serif' }}>
                       {Number.isFinite(it.unitPrice) ? (+it.unitPrice).toFixed(2) : '0.00'}
                     </span>
                   </td>
@@ -217,7 +208,7 @@ function ItemsTable({ items, onAllocate, onChangePrice, onChangeQuantity, onAddR
                     style={{ ...tdBase, whiteSpace: 'nowrap', cursor: 'pointer', textAlign: 'center' }}
                     onClick={() => { setCalcTarget({ type: 'qty', index: idx }); setCalcValue(originalQty); setIsCalcOpen(true) }}
                   >
-                    <span style={{ fontWeight: 600, fontFamily: '"Courier New", Courier, monospace' }}>{it.quantity}</span>
+                    <span style={{ fontWeight: 'bold', fontFamily: 'Arial, sans-serif' }}>{it.quantity}</span>
                   </td>
                   <td style={{ ...tdBase, textAlign: 'center', verticalAlign: 'middle', background: 'transparent' }}>
                     <div style={{ position: 'relative', width: 44, height: 44, margin: '0 auto', transform: 'translateX(-6px)' }}>
@@ -286,42 +277,73 @@ function ItemsTable({ items, onAllocate, onChangePrice, onChangeQuantity, onAddR
               {/* Total row inside the table */}
               <tr>
                 {/* Label spans delete + description columns */}
-                <td colSpan={2} style={{ ...tdBase, fontWeight: 600, fontFamily: '"Courier New", Courier, monospace', fontSize: 14, background: '#d4edda' }}>Total Food & Beverages</td>
+                <td colSpan={2} style={{ ...tdBase, fontWeight: 'bold', fontFamily: 'Arial, sans-serif', fontSize: 15, background: '#d4edda', height: '60px', padding: '16px 8px' }}>Total Food & Beverages</td>
                 {/* Amount spans price + quantity + allocation columns */}
-                <td colSpan={3} style={{ ...tdBase, fontWeight: 600, fontFamily: '"Courier New", Courier, monospace', whiteSpace: 'nowrap', textAlign: 'center', fontSize: 14, background: '#d4edda' }}>
-                  <span style={{ fontWeight: 600, fontFamily: '"Courier New", Courier, monospace' }}>{itemsTotal.toFixed(2)}</span>
+                <td colSpan={3} style={{ ...tdBase, fontWeight: 'bold', fontFamily: 'Arial, sans-serif', whiteSpace: 'nowrap', textAlign: 'center', fontSize: 15, background: '#d4edda', height: '60px', padding: '16px 8px' }}>
+                  <span style={{ fontWeight: 'bold', fontFamily: 'Arial, sans-serif' }}>{itemsTotal.toFixed(2)}</span>
                 </td>
               </tr>
               {/* Add row control */}
               <tr>
-                <td colSpan={5} style={{ ...tdBase, background: '#ffffff', textAlign: 'center' }}>
+                <td colSpan={5} style={{ ...tdBase, background: '#000000', textAlign: 'center' }}>
                   <button
                     onClick={() => onAddRow && onAddRow()}
                     disabled={!onAddRow}
+                    className="relative"
                     style={{
                       padding: '10px 14px',
                       borderRadius: 10,
-                      border: '2px solid #059669',
+                      border: '2px solid #000',
                       borderStyle: 'outset',
-                      background: 'linear-gradient(145deg, #10b981, #059669)',
-                      color: '#ffffff',
-                      fontWeight: 800,
+                      background: '#00FF00',
+                      color: '#000',
+                      fontWeight: 'bold',
+                      fontSize: '14px',
                       cursor: onAddRow ? 'pointer' : 'not-allowed',
-                      boxShadow: '0 6px 12px rgba(0,0,0,0.25)',
+                      boxShadow: '0 4px 8px rgba(0, 255, 0, 0.4), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)',
                     }}
-                    title="Add a new row duplicating the last item's description, price, and quantity"
+                    title="Add a new row with blank description, unit price 0, quantity 1"
                   >
+                    <span className="shine" aria-hidden />
                     + Add row
                   </button>
                 </td>
               </tr>
               </>
             ) : (
-              <tr>
-                <td colSpan={4} style={{ ...tdBase, textAlign: 'center', fontStyle: 'italic', background: '#f0f0f0' }}>
-                  No items added
-                </td>
-              </tr>
+              <>
+                <tr>
+                  <td colSpan={5} style={{ ...tdBase, textAlign: 'center', fontStyle: 'italic', background: '#f0f0f0', padding: '20px 8px' }}>
+                    No items found. Use the buttons above to scan a receipt or manually add items below.
+                  </td>
+                </tr>
+                {/* Add row control for empty table */}
+                <tr>
+                  <td colSpan={5} style={{ ...tdBase, background: '#000000', textAlign: 'center' }}>
+                    <button
+                      onClick={() => onAddRow && onAddRow()}
+                      disabled={!onAddRow}
+                      className="relative"
+                      style={{
+                        padding: '12px 16px',
+                        borderRadius: 10,
+                        border: '2px solid #000',
+                        borderStyle: 'outset',
+                        background: '#00FF00',
+                        color: '#000',
+                        fontWeight: 'bold',
+                        fontSize: '14px',
+                        cursor: onAddRow ? 'pointer' : 'not-allowed',
+                        boxShadow: '0 4px 8px rgba(0, 255, 0, 0.4), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)',
+                      }}
+                      title="Add a new row to manually enter item details"
+                    >
+                      <span className="shine" aria-hidden />
+                      + Add Item Manually
+                    </button>
+                  </td>
+                </tr>
+              </>
             )}
           </tbody>
         </table>
@@ -341,6 +363,23 @@ function ItemsTable({ items, onAllocate, onChangePrice, onChangeQuantity, onAddR
         showOperations={false}
         confirmLabel="Change"
         compact
+      />
+
+      <CustomKeyboard
+        isOpen={isKeyboardOpen}
+        currentValue={keyboardTarget !== null ? (items[keyboardTarget]?.description || '') : ''}
+        onClose={() => {
+          setIsKeyboardOpen(false)
+          setKeyboardTarget(null)
+        }}
+        onConfirm={(value) => {
+          if (keyboardTarget !== null && onChangeDescription) {
+            onChangeDescription(keyboardTarget, value)
+          }
+          setIsKeyboardOpen(false)
+          setKeyboardTarget(null)
+        }}
+        placeholder="Enter item description"
       />
     </section>
   )
