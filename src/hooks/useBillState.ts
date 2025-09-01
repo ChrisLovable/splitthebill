@@ -380,8 +380,12 @@ export function useBillState() {
   // Allocate one unit from any available item to the specified color
   const allocateToColor = (color: string) => {
     hasUserEditsRef.current = true
+    
+    // First set this as the active color
+    setActiveColor(color)
+    
     setItems(prev => {
-      // Find first item with available quantity
+      // Find any item with available quantity
       for (let i = 0; i < prev.length; i++) {
         if (prev[i].quantity > 0) {
           const newItems = [...prev]
@@ -390,13 +394,13 @@ export function useBillState() {
           item.quantity = item.quantity - 1
           item.colorAllocations = { ...item.colorAllocations, [color]: (item.colorAllocations[color] || 0) + 1 }
           newItems[i] = item
+          console.log(`[Allocation] Allocated 1 unit of "${item.description}" to color ${color}`)
           return newItems
         }
       }
+      console.log('[Allocation] No available items to allocate')
       return prev // No available items to allocate
     })
-    // Also set this as the active color
-    setActiveColor(color)
   }
 
   // Override: click on a colored allocation label to move one unit to active color
