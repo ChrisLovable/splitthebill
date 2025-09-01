@@ -377,6 +377,28 @@ export function useBillState() {
     })
   }
 
+  // Allocate one unit from any available item to the specified color
+  const allocateToColor = (color: string) => {
+    hasUserEditsRef.current = true
+    setItems(prev => {
+      // Find first item with available quantity
+      for (let i = 0; i < prev.length; i++) {
+        if (prev[i].quantity > 0) {
+          const newItems = [...prev]
+          const item = { ...newItems[i] }
+          if (!item.colorAllocations) item.colorAllocations = {}
+          item.quantity = item.quantity - 1
+          item.colorAllocations = { ...item.colorAllocations, [color]: (item.colorAllocations[color] || 0) + 1 }
+          newItems[i] = item
+          return newItems
+        }
+      }
+      return prev // No available items to allocate
+    })
+    // Also set this as the active color
+    setActiveColor(color)
+  }
+
   // Override: click on a colored allocation label to move one unit to active color
   const overrideAllocation = (index: number, fromColor: string) => {
     if (!activeColor) return
@@ -502,6 +524,7 @@ export function useBillState() {
     runOCR,
     addColor,
     allocateOne,
+    allocateToColor,
     overrideAllocation,
     deallocateOne,
     incrementTip,

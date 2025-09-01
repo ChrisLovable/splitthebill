@@ -6,90 +6,50 @@ type Props = {
   totals: Record<string, number>
   onSelect: (c: string) => void
   onAdd: () => void
+  onAllocateToColor?: (color: string) => void
 }
 
 
 
-export default function ColorPalette({ colors, activeColor, totals, onSelect }: Props) {
+export default function ColorPalette({ colors, activeColor, totals, onSelect, onAllocateToColor }: Props) {
   return (
     <>
-      {/* Color buttons in rows of 5 */}
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8, padding: '8px 12px' }}>
-        {Array.from({ length: Math.ceil(colors.length / 5) }, (_, rowIndex) => (
-          <div 
-            key={rowIndex}
+      {/* Oval color total pills with allocation functionality */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 12, padding: '8px 12px' }}>
+        {colors.map((c, i) => (
+          <Card 
+            key={`tile-${c}`} 
             style={{ 
+              background: c, 
+              color: '#ffffff', 
+              height: 40, 
               display: 'flex', 
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: 16,
-              maxWidth: '100%'
+              alignItems: 'center', 
+              justifyContent: 'flex-end', 
+              padding: '0 12px', 
+              paddingLeft: 32, 
+              position: 'relative',
+              cursor: 'pointer',
+              border: activeColor === c ? '3px solid #fff' : '2px solid rgba(0,0,0,0.3)',
+              boxShadow: activeColor === c 
+                ? `0 0 15px ${c}AA, 0 0 25px ${c}77, inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -2px 6px rgba(0,0,0,0.4)`
+                : 'inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.2)',
+              transform: activeColor === c ? 'scale(1.02)' : 'scale(1)',
+              transition: 'all 0.2s ease'
+            }}
+            onClick={() => {
+              onSelect(c)
+              if (onAllocateToColor) onAllocateToColor(c)
             }}
           >
-            {colors.slice(rowIndex * 5, (rowIndex + 1) * 5).map((c, idxInRow) => {
-              const idx = rowIndex * 5 + idxInRow
-              const numberLabel = (idx + 1).toString()
-              const isActive = activeColor === c
-              return (
-                <button
-                  key={c}
-                  aria-label={`color ${c}`}
-                  onClick={() => onSelect(c)}
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 9999,
-                    background: c,
-                    position: 'relative',
-                    border: '2px solid rgba(255,255,255,0.75)',
-                    boxShadow: isActive
-                      ? `0 0 15px ${c}AA, 0 0 30px ${c}88, inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -5px 10px rgba(0,0,0,0.6)`
-                      : 'inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -4px 8px rgba(0,0,0,0.55)',
-                    transform: isActive ? 'scale(1.05)' : 'scale(1)',
-                    flex: '0 0 auto',
-                    margin: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  {/* Number label */}
-                  <span style={{
-                    position: 'relative',
-                    zIndex: 1,
-                    color: '#000',
-                    fontWeight: 400,
-                    fontSize: 16,
-                    textShadow: '0 1px 0 rgba(255,255,255,0.6)'
-                  }}>{numberLabel}</span>
-
-                  {isActive && (
-                    <span style={{
-                      position: 'absolute',
-                      inset: -5,
-                      borderRadius: 'inherit',
-                      boxShadow: `0 0 20px ${c}99, 0 0 35px ${c}66`,
-                      pointerEvents: 'none'
-                    }} />
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 12 }}>
-        {colors.map((c, i) => (
-          <Card key={`tile-${c}`} style={{ background: c, color: '#ffffff', height: 30, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 10px', paddingLeft: 28, position: 'relative' }}>
             <span style={{ fontWeight: 800, color: '#ffffff', textAlign: 'right', width: '100%' }}>R{(totals[c] || 0).toFixed(2)}</span>
             {/* Number label near the left inside the pill with round black border */}
             <span
               style={{
                 position: 'absolute',
                 left: 8,
-                width: 18,
-                height: 18,
+                width: 20,
+                height: 20,
                 borderRadius: '50%',
                 border: '2px solid #000',
                 display: 'inline-flex',
@@ -99,7 +59,8 @@ export default function ColorPalette({ colors, activeColor, totals, onSelect }: 
                 color: '#000',
                 fontWeight: 400,
                 fontSize: 14,
-                background: 'transparent'
+                background: 'rgba(255,255,255,0.9)',
+                boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.8), inset 0 -1px 2px rgba(0,0,0,0.3)'
               }}
             >
               {(i + 1).toString()}

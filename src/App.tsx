@@ -252,6 +252,7 @@ function App() {
         totals={state.totalsByColor} 
         onSelect={state.setActiveColor} 
         onAdd={state.addColor}
+        onAllocateToColor={state.allocateToColor}
       />
 
       <div style={{ padding: '8px 16px', display: 'flex', justifyContent: 'center' }}>
