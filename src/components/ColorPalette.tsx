@@ -1,4 +1,4 @@
-import Card from './Card'
+
 
 // Custom animation styles
 const animationStyles = `
