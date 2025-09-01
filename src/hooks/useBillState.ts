@@ -372,8 +372,21 @@ export function useBillState() {
       const vi = await callVeryfi(image)
       if (!vi) { setEnginePrompt({ engine, itemsSum: 0, billTotal: 0, nextEngine: enginesOrder[engineIndexRef.current + 1] || null }); return }
       const { ok, itemsSum } = evaluateParse(vi.items, vi.netTotal)
-      if (ok) { setItems(vi.items); setCharges(vi.charges); setNetTotal(vi.netTotal); setBillText(''); setOcrProgress(100); if (vi.netTotal) setTimeout(() => setShowBillTotalPopup(true), 500) }
-      else { setEnginePrompt({ engine, itemsSum, billTotal: vi.netTotal, nextEngine: enginesOrder[engineIndexRef.current + 1] || null }) }
+      // Always show Veryfi results, even if parsing validation fails
+      setItems(vi.items); 
+      setCharges(vi.charges); 
+      setNetTotal(vi.netTotal); 
+      setBillText(''); 
+      setOcrProgress(100); 
+      
+      if (vi.netTotal) {
+        setTimeout(() => setShowBillTotalPopup(true), 500)
+      } else if (!ok && vi.items.length > 0) {
+        // Show a warning if parsing seems incomplete but we have some items
+        setTimeout(() => {
+          alert('⚠️ Parsing may have errors. Please review the items and amounts before proceeding.')
+        }, 1000)
+      }
       return
     }
     if (engine === 'openai') {
