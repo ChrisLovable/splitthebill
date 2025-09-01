@@ -110,10 +110,11 @@ function ItemsTable({ items, onAllocate, onChangePrice, onChangeQuantity, onAddR
           background: 'transparent'
         }}>
           <colgroup>
-            <col style={{ width: 28 }} />
-            <col style={{ width: '56%' }} />
-            <col style={{ width: '22%' }} />
-            <col style={{ width: '22%' }} />
+            <col style={{ width: '6%' }} />
+            <col style={{ width: '44%' }} />
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '15%' }} />
           </colgroup>
           <tbody>
             {items.length > 0 ? (
