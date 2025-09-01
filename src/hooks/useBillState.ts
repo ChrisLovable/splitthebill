@@ -45,7 +45,7 @@ export function useBillState() {
   const veryfiClientId = 'vrfNVLAahBk1YnNna8BtubLRTUBjzVJJVhTTvIL'
   const veryfiUsername = 'chrisdevries.personal'
   const veryfiApiKey = 'b21db4e417060b1ff31d3d2c369d8ad6'
-  const veryfiEndpoint = process.env.NODE_ENV === 'development' ? '/veryfi/api/v8/partner/documents' : '/api/veryfi'
+  const veryfiEndpoint = import.meta.env.DEV ? '/veryfi/api/v8/partner/documents' : '/api/veryfi'
   // OpenAI
   const openaiKey = (import.meta as any).env?.VITE_OPENAI_API_KEY as string | undefined
   const openaiModel = ((import.meta as any).env?.VITE_OPENAI_MODEL as string | undefined) || 'gpt-4o-mini'
