@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 type Props = {
   numPersons: number
   setNumPersons: (n: number) => void
@@ -6,6 +8,42 @@ type Props = {
 }
 
 export default function CustomerSplitControls({ numPersons, setNumPersons, splitEvenly, setSplitEvenly }: Props) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const buttonStyle: React.CSSProperties = {
+    fontSize: 18,
+    fontWeight: 900,
+    padding: '10px 28px 10px 12px',
+    borderRadius: 20,
+    border: '3px solid #000',
+    borderStyle: 'outset',
+    background: 'linear-gradient(145deg, #f0f0f0, #d0d0d0)',
+    color: '#000',
+    cursor: 'pointer',
+    width: 65,
+    textAlign: 'center',
+    boxShadow: '0 6px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.8), inset 0 -2px 4px rgba(0,0,0,0.3)',
+    transition: 'all 0.15s ease',
+    textShadow: '0 1px 2px rgba(255,255,255,0.8)',
+    position: 'relative'
+  }
+
+  const optionStyle: React.CSSProperties = {
+    padding: '8px 12px',
+    cursor: 'pointer',
+    fontSize: 16,
+    fontWeight: 900,
+    textAlign: 'center',
+    border: '2px solid #000',
+    borderStyle: 'outset',
+    background: 'linear-gradient(145deg, #ffffff, #e0e0e0)',
+    color: '#000',
+    textShadow: '0 1px 2px rgba(255,255,255,0.9)',
+    boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.9), inset 0 -1px 2px rgba(0,0,0,0.2)',
+    margin: '1px 0',
+    borderRadius: 8
+  }
+
   return (
     <div style={{ padding: '12px 16px' }}>
       <div style={{ 
@@ -25,28 +63,9 @@ export default function CustomerSplitControls({ numPersons, setNumPersons, split
         </span>
         
         <div style={{ position: 'relative' }}>
-          <select
-            value={numPersons}
-            onChange={(e) => setNumPersons(parseInt(e.target.value, 10))}
-            style={{
-              appearance: 'none',
-              WebkitAppearance: 'none',
-              MozAppearance: 'none',
-              fontSize: 18,
-              fontWeight: 900,
-              padding: '10px 28px 10px 12px',
-              borderRadius: 20,
-              border: '3px solid #000',
-              borderStyle: 'outset',
-              background: 'linear-gradient(145deg, #f0f0f0, #d0d0d0)',
-              color: '#000',
-              cursor: 'pointer',
-              width: 65,
-              textAlign: 'center',
-              boxShadow: '0 6px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.8), inset 0 -2px 4px rgba(0,0,0,0.3)',
-              transition: 'all 0.15s ease',
-              textShadow: '0 1px 2px rgba(255,255,255,0.8)'
-            }}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            style={buttonStyle}
             onMouseDown={(e) => {
               e.currentTarget.style.transform = 'translateY(2px)'
               e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4), inset 0 1px 3px rgba(0,0,0,0.4), inset 0 -1px 2px rgba(255,255,255,0.6)'
@@ -60,10 +79,8 @@ export default function CustomerSplitControls({ numPersons, setNumPersons, split
               e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.8), inset 0 -2px 4px rgba(0,0,0,0.3)'
             }}
           >
-            {Array.from({ length: 25 }, (_, i) => i + 1).map(n => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
+            {numPersons}
+          </button>
           
           {/* Custom dropdown arrow */}
           <div style={{
@@ -78,6 +95,55 @@ export default function CustomerSplitControls({ numPersons, setNumPersons, split
           }}>
             ▼
           </div>
+
+          {/* Custom dropdown menu */}
+          {isOpen && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              zIndex: 1000,
+              background: 'linear-gradient(145deg, #f8f8f8, #e8e8e8)',
+              border: '3px solid #000',
+              borderStyle: 'outset',
+              borderRadius: 12,
+              boxShadow: '0 8px 16px rgba(0,0,0,0.5)',
+              maxHeight: 200,
+              overflowY: 'auto',
+              marginTop: 4
+            }}>
+              {Array.from({ length: 25 }, (_, i) => i + 1).map(n => (
+                <div
+                  key={n}
+                  onClick={() => {
+                    setNumPersons(n)
+                    setIsOpen(false)
+                  }}
+                  style={{
+                    ...optionStyle,
+                    ...(n === numPersons ? {
+                      background: 'linear-gradient(145deg, #0066FF, #0052CC)',
+                      color: '#fff',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                    } : {})
+                  }}
+                  onMouseEnter={(e) => {
+                    if (n !== numPersons) {
+                      e.currentTarget.style.background = 'linear-gradient(145deg, #e6f3ff, #cce7ff)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (n !== numPersons) {
+                      e.currentTarget.style.background = 'linear-gradient(145deg, #ffffff, #e0e0e0)'
+                    }
+                  }}
+                >
+                  {n}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         
         <span style={{ 
@@ -107,6 +173,21 @@ export default function CustomerSplitControls({ numPersons, setNumPersons, split
         />
         <span>Split total food & beverages evenly</span>
       </label>
+
+      {/* Click outside to close dropdown */}
+      {isOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 999
+          }}
+          onClick={() => setIsOpen(false)}
+        />
+      )}
     </div>
   )
 }
