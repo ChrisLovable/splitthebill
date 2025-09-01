@@ -194,28 +194,23 @@ export function useBillState() {
   const callVeryfi = useCallback(async (imageDataUrl: string) => {
     try {
       console.log('[Veryfi] endpoint:', veryfiEndpoint)
-      alert(`[DEBUG] Starting Veryfi call to: ${veryfiEndpoint}`)
       if (!veryfiClientId || !veryfiUsername || !veryfiApiKey) { 
         console.warn('[Veryfi] missing envs')
-        alert('[DEBUG] Missing Veryfi credentials')
         return null 
       }
       const base64 = imageDataUrl.startsWith('data:') ? imageDataUrl.split(',')[1] : imageDataUrl
       const body = { file_name: 'receipt.jpg', file_data: base64 }
-      alert(`[DEBUG] Sending request with ${base64.length} chars of base64 data`)
       const res = await fetch(veryfiEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Client-Id': veryfiClientId, 'Authorization': `apikey ${veryfiUsername}:${veryfiApiKey}` }, body: JSON.stringify(body) })
       console.log('[Veryfi] status:', res.status)
-      alert(`[DEBUG] Veryfi response status: ${res.status}`)
       if (!res.ok) { 
         const errorText = await res.text()
         console.error('[Veryfi] error body:', errorText)
-        alert(`[DEBUG] Veryfi error: ${res.status} - ${errorText.substring(0, 200)}`)
         return null 
       }
       const data = await res.json()
-      alert(`[DEBUG] Veryfi success! Found ${data?.line_items?.length || 0} items`)
+      console.log('[Veryfi] success! Found', data?.line_items?.length || 0, 'items')
       const viItems: BillItem[] = Array.isArray(data?.line_items) ? data.line_items.map((li: any) => { const qty = Math.max(1, Math.round(li?.quantity ?? 1)); const unitPrice = Number.isFinite(li?.price) ? +li.price : (li?.total && qty ? +(li.total / qty) : 0); return { description: String(li?.description || li?.category || 'Item').trim(), quantity: qty, unitPrice: +(+unitPrice).toFixed(2), colorAllocations: {} } }).filter((it: BillItem) => it.unitPrice > 0) : []
-      alert(`[DEBUG] Processed ${viItems.length} valid items. First item: ${viItems[0]?.description || 'none'} - ${viItems[0]?.unitPrice || 0}`)
+      console.log('[Veryfi] processed', viItems.length, 'valid items')
       const viCharges: BillCharge[] = []
       const addCharge = (label: string, amount: number | undefined) => { if (amount != null && Number.isFinite(amount) && Math.abs(amount) > 0) viCharges.push({ label, amount: +(+amount).toFixed(2) }) }
       addCharge('Tax', data?.tax); addCharge('Tip', data?.tip); if (data?.discount) viCharges.push({ label: 'Discount', amount: -Math.abs(+data.discount) })
@@ -223,7 +218,6 @@ export function useBillState() {
       return { items: viItems, charges: viCharges, netTotal: viNet }
     } catch (err) { 
       console.error('[Veryfi] exception:', err)
-      alert(`[DEBUG] Veryfi exception: ${err}`)
       return null 
     }
   }, [veryfiClientId, veryfiUsername, veryfiApiKey, veryfiEndpoint])
