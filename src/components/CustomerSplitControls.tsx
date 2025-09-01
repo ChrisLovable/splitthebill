@@ -32,31 +32,32 @@ export default function CustomerSplitControls({ numPersons, setNumPersons, split
               appearance: 'none',
               WebkitAppearance: 'none',
               MozAppearance: 'none',
-              fontSize: 20,
-              fontWeight: 800,
-              padding: '12px 40px 12px 16px',
-              borderRadius: 12,
+              fontSize: 18,
+              fontWeight: 900,
+              padding: '10px 28px 10px 12px',
+              borderRadius: 20,
               border: '3px solid #000',
               borderStyle: 'outset',
-              background: 'linear-gradient(145deg, #ffffff, #e6e6e6)',
+              background: 'linear-gradient(145deg, #f0f0f0, #d0d0d0)',
               color: '#000',
               cursor: 'pointer',
-              minWidth: 80,
+              width: 65,
               textAlign: 'center',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.25), inset 0 1px 2px rgba(255,255,255,0.6)',
-              transition: 'all 0.15s ease'
+              boxShadow: '0 6px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.8), inset 0 -2px 4px rgba(0,0,0,0.3)',
+              transition: 'all 0.15s ease',
+              textShadow: '0 1px 2px rgba(255,255,255,0.8)'
             }}
             onMouseDown={(e) => {
-              e.currentTarget.style.transform = 'translateY(1px)'
-              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.25), inset 0 1px 2px rgba(0,0,0,0.2)'
+              e.currentTarget.style.transform = 'translateY(2px)'
+              e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4), inset 0 1px 3px rgba(0,0,0,0.4), inset 0 -1px 2px rgba(255,255,255,0.6)'
             }}
             onMouseUp={(e) => {
               e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.25), inset 0 1px 2px rgba(255,255,255,0.6)'
+              e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.8), inset 0 -2px 4px rgba(0,0,0,0.3)'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.25), inset 0 1px 2px rgba(255,255,255,0.6)'
+              e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.8), inset 0 -2px 4px rgba(0,0,0,0.3)'
             }}
           >
             {Array.from({ length: 25 }, (_, i) => i + 1).map(n => (
@@ -67,13 +68,13 @@ export default function CustomerSplitControls({ numPersons, setNumPersons, split
           {/* Custom dropdown arrow */}
           <div style={{
             position: 'absolute',
-            right: 12,
+            right: 8,
             top: '50%',
             transform: 'translateY(-50%)',
             pointerEvents: 'none',
-            fontSize: 16,
+            fontSize: 12,
             fontWeight: 900,
-            color: '#666'
+            color: '#444'
           }}>
             ▼
           </div>
