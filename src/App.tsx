@@ -11,7 +11,7 @@ import AmountRemaining from './components/AmountRemaining'
 
 import { useBillState } from './hooks/useBillState'
 
-const headerImage = "/public/spur.jpg"
+const headerImage = "/spur.jpg"
 
 function App() {
   const state = useBillState()
