@@ -60,7 +60,7 @@ export default function TipTable({ tipAmount, setTipAmount, splitTipEvenly, setS
     <section style={{ padding: '12px 16px' }}>
       {/* Big Tip Amount Input Above Table */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: 16, gap: 8 }}>
-        <label style={{ color: '#0066FF', fontSize: 18, fontWeight: 'bold' }}>Tip Amount</label>
+        <label style={{ color: '#0066FF', fontSize: 20, fontWeight: 'bold' }}>Tap to enter the tip amount</label>
         <input
           type="text"
           value={tipAmount ? `R${tipAmount.toFixed(2).replace(',', '.')}` : 'R0.00'}

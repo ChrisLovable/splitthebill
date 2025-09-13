@@ -341,8 +341,8 @@ function ItemsTable({ items, onAllocate, onChangePrice, onChangeQuantity, onAddR
                       <span className="shine" aria-hidden />
                       + Add Item Manually
                     </button>
-                  </td>
-                </tr>
+                </td>
+              </tr>
               </>
             )}
           </tbody>

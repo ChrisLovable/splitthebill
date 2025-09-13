@@ -63,7 +63,7 @@ export default function ColorPalette({ colors, activeColor, totals, onSelect }: 
               color: '#ffffff', 
               height: 40, 
               display: 'flex', 
-              alignItems: 'center', 
+              alignItems: 'center',
               justifyContent: 'flex-end', 
               padding: '0 12px', 
               paddingLeft: 32, 
@@ -102,7 +102,7 @@ export default function ColorPalette({ colors, activeColor, totals, onSelect }: 
             }}>R{(totals[c] || 0).toFixed(2)}</span>
             {/* Number label near the left inside the pill with round black border */}
             <span
-              style={{
+                  style={{
                 position: 'absolute',
                 left: 8,
                 width: 20,
@@ -110,7 +110,7 @@ export default function ColorPalette({ colors, activeColor, totals, onSelect }: 
                 borderRadius: '50%',
                 border: '2px solid #000',
                 display: 'inline-flex',
-                alignItems: 'center',
+                    alignItems: 'center',
                 justifyContent: 'center',
                 lineHeight: 1,
                 color: '#000',

@@ -142,9 +142,9 @@ export default function CameraCapture({ isCapturing, isScanning, videoRef, onOpe
           
           <div className="flex gap-2">
             {!isScanning ? (
-              <button 
-                className="flex-1 font-bold touch-manipulation" 
-                onClick={onCapture}
+            <button 
+              className="flex-1 font-bold touch-manipulation" 
+              onClick={onCapture}
               style={{
                 minHeight: '35px',
                 padding: '8px 12px',
@@ -172,9 +172,9 @@ export default function CameraCapture({ isCapturing, isScanning, videoRef, onOpe
                 e.currentTarget.style.transform = 'translateY(0)'
                 e.currentTarget.style.boxShadow = '0 4px 8px rgba(16, 185, 129, 0.4), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.3)'
               }}
-                          >
-                📸 Capture
-              </button>
+            >
+              📸 Capture
+            </button>
             ) : (
               <button 
                 className="flex-1 font-bold touch-manipulation" 
