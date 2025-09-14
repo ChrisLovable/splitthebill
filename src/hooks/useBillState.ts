@@ -93,8 +93,8 @@ export function useBillState() {
   logMindeeEnvStatus('init', mindeeEndpoint)
 
   const enginesOrder: EngineName[] = useMemo(() => {
-    const list: EngineName[] = ['veryfi']
-    console.log('[OCR] engine order (forced Veryfi test):', list)
+    const list: EngineName[] = ['openai', 'tesseract', 'veryfi']
+    console.log('[OCR] engine order:', list)
     return list
   }, [])
 
@@ -115,6 +115,39 @@ export function useBillState() {
     const u8 = new Uint8Array(n)
     while (n--) u8[n] = bstr.charCodeAt(n)
     return new Blob([u8], { type: mime })
+  }
+
+  // Compress large images to stay under server limits and speed up OCR
+  const compressImageDataUrl = (imageDataUrl: string, maxDimension = 1280, quality = 0.72): Promise<string> => {
+    return new Promise((resolve) => {
+      try {
+        if (!imageDataUrl.startsWith('data:')) { resolve(imageDataUrl); return }
+        const img = new Image()
+        img.onload = () => {
+          try {
+            const { width, height } = img
+            const maxSide = Math.max(width, height)
+            const scale = maxSide > maxDimension ? (maxDimension / maxSide) : 1
+            const targetW = Math.max(1, Math.round(width * scale))
+            const targetH = Math.max(1, Math.round(height * scale))
+            const canvas = document.createElement('canvas')
+            canvas.width = targetW
+            canvas.height = targetH
+            const ctx = canvas.getContext('2d')
+            if (!ctx) { resolve(imageDataUrl); return }
+            ctx.drawImage(img, 0, 0, targetW, targetH)
+            const out = canvas.toDataURL('image/jpeg', quality)
+            resolve(out)
+          } catch {
+            resolve(imageDataUrl)
+          }
+        }
+        img.onerror = () => resolve(imageDataUrl)
+        img.src = imageDataUrl
+      } catch {
+        resolve(imageDataUrl)
+      }
+    })
   }
 
   const callMindee = useCallback(async (imageDataUrl: string) => {
@@ -203,7 +236,9 @@ export function useBillState() {
         console.warn('[Veryfi] missing envs')
         return null 
       }
-      const base64 = imageDataUrl.startsWith('data:') ? imageDataUrl.split(',')[1] : imageDataUrl
+      // Compress before sending to avoid oversized payloads in production
+      const preparedDataUrl = await compressImageDataUrl(imageDataUrl, 1280, 0.72)
+      const base64 = preparedDataUrl.startsWith('data:') ? preparedDataUrl.split(',')[1] : preparedDataUrl
       const body = { file_name: 'receipt.jpg', file_data: base64 }
       const res = await fetch(veryfiEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Client-Id': veryfiClientId, 'Authorization': `apikey ${veryfiUsername}:${veryfiApiKey}` }, body: JSON.stringify(body) })
       console.log('[Veryfi] status:', res.status)

@@ -1,0 +1,8 @@
+[33mcommit 2c86a89cca7ef665d2bfcde15fff92274fbd97a8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: chrisdevries <chrisdevries.personal@gmail.com>
+Date:   Sun Sep 14 09:48:20 2025 +0200
+
+    Tip label: wording + font size
+
+src/components/ReceiptPreview.tsx
+src/hooks/useBillState.ts
