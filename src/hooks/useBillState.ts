@@ -294,6 +294,7 @@ export function useBillState() {
     const canvas = canvasRef.current
     if (video.videoWidth === 0 || video.videoHeight === 0) { console.error('Video not ready'); alert('Camera not ready. Please wait a moment and try again.'); return }
     try {
+      // Capture full resolution from the video stream
       canvas.width = video.videoWidth
       canvas.height = video.videoHeight
       const ctx = canvas.getContext('2d'); if (!ctx) return
