@@ -68,20 +68,7 @@ export default function ReceiptPreview({ image, onRunOCR, ocrProgress }: Props) 
   
   return (
     <div className="px-4 pt-3 space-y-2">
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <img
-          src={image}
-          alt="Captured bill"
-          style={{
-            width: 72,
-            height: 72,
-            objectFit: 'cover',
-            borderRadius: 12,
-            border: '2px solid #000',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.35)'
-          }}
-        />
-      </div>
+      <img src={image} alt="Captured bill" className="w-full rounded" />
       {showOcrDone && (
         <div style={{
           position: 'relative',
